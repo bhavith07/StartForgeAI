@@ -1,10 +1,13 @@
-import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 
-import analyzeRoutes from "./routes/analyzeRoutes.js";
+dotenv.config({
+  path: "./.env",
+});
 
-dotenv.config();
+console.log("Loaded API Key:", process.env.GEMINI_API_KEY ? "YES" : "NO");
+import cors from "cors";
+import express from "express";
+import analyzeRoutes from "./routes/analyzeRoutes.js";
 
 const app = express();
 
