@@ -7,6 +7,6 @@ Eg: GEMINI_API="YOUR API KEY"(remove the quotes and enter your key).
 gemini analysis is working.
 and also added the option to download pdf report of the data.
 it will analyse the weakness andvantage of your startup idea.
-
+we addeded mongo db connecytion to the application so we can save our login info.
 Currently its in development phase.
 Thank you .
