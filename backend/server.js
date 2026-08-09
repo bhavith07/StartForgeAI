@@ -4,10 +4,11 @@ dotenv.config({
   path: "./.env",
 });
 
-console.log("Loaded API Key:", process.env.GEMINI_API_KEY ? "YES" : "NO");
 import cors from "cors";
 import express from "express";
+
 import analyzeRoutes from "./routes/analyzeRoutes.js";
+import { connectDB } from "./config/db.js";
 
 const app = express();
 
@@ -24,6 +25,16 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+async function startServer() {
+  try {
+    await connectDB();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Server failed to start");
+  }
+}
+
+startServer();
