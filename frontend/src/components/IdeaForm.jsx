@@ -21,6 +21,10 @@ export default function IdeaForm() {
     });
   }
 
+  // ==========================================
+  // ANALYZE STARTUP
+  // ==========================================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -28,17 +32,49 @@ export default function IdeaForm() {
     setResult(null);
 
     try {
+      // Get JWT token saved after login
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Please login before analyzing a startup.");
+        setLoading(false);
+        return;
+      }
+
       const response = await axios.post(
         "http://localhost:5000/api/analyze",
-        form
+        form,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
 
-      const parsedResult = JSON.parse(response.data.analysis);
+      const parsedResult =
+        typeof response.data.analysis === "string"
+          ? JSON.parse(response.data.analysis)
+          : response.data.analysis;
 
       setResult(parsedResult);
+
+      console.log(
+        "Analysis saved with ID:",
+        response.data.analysisId
+      );
     } catch (error) {
-      console.error(error);
-      alert("Failed to analyze startup.");
+      console.error("Analysis error:", error);
+
+      if (error.response?.status === 401) {
+        alert("Your login session has expired. Please login again.");
+        return;
+      }
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to analyze startup."
+      );
     } finally {
       setLoading(false);
     }
@@ -212,7 +248,6 @@ export default function IdeaForm() {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
 
-    // Numbering starts from 1
     result.strengths.forEach((item, index) => {
       checkPage(15);
 
@@ -250,7 +285,6 @@ export default function IdeaForm() {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
 
-    // Numbering starts from 1
     result.weaknesses.forEach((item, index) => {
       checkPage(15);
 
@@ -288,7 +322,6 @@ export default function IdeaForm() {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
 
-    // Numbering starts from 1
     result.suggestions.forEach((item, index) => {
       checkPage(15);
 
