@@ -9,5 +9,6 @@ and also added the option to download pdf report of the data.
 it will analyse the weakness andvantage of your startup idea.
 we added mongo db connection to the application so we can save our login info.
 and also it contains login athentcation system.
+also changed the user ui 
 Currently its in development phase.
 Thank you .
