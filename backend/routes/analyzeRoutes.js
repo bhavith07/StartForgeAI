@@ -1,5 +1,4 @@
 import express from "express";
-import { ObjectId } from "mongodb";
 
 import { analyzeStartup } from "../services/geminiService.js";
 
@@ -45,40 +44,34 @@ router.post("/", authenticateToken, async (req, res) => {
       });
     }
 
-    // Save analysis to MongoDB
+    // Save analysis to PostgreSQL
     const savedAnalysis = await createAnalysis({
-      userId: req.user.userId,
-
+      userId: Number(req.user.userId),
       startupName: req.body.startupName,
       idea: req.body.idea,
       industry: req.body.industry,
       audience: req.body.audience,
       model: req.body.model,
-
       startupScore: parsedAnalysis.startupScore,
       marketPotential: parsedAnalysis.marketPotential,
       competition: parsedAnalysis.competition,
       estimatedCost: parsedAnalysis.estimatedCost,
-
       strengths: parsedAnalysis.strengths || [],
       weaknesses: parsedAnalysis.weaknesses || [],
       suggestions: parsedAnalysis.suggestions || [],
-
       createdAt: new Date(),
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: "Startup analyzed and saved successfully.",
-
       analysis: JSON.stringify(parsedAnalysis),
-
-      analysisId: savedAnalysis._id,
+      analysisId: savedAnalysis.id,
     });
   } catch (error) {
     console.error("Analysis error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -95,20 +88,17 @@ router.get(
   async (req, res) => {
     try {
       const analyses = await getUserAnalyses(
-        req.user.userId
+        Number(req.user.userId)
       );
 
-      res.json({
+      return res.json({
         success: true,
         analyses,
       });
     } catch (error) {
-      console.error(
-        "History error:",
-        error
-      );
+      console.error("History error:", error);
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: "Failed to load analysis history.",
       });
@@ -125,20 +115,19 @@ router.get(
   authenticateToken,
   async (req, res) => {
     try {
-      const { id } = req.params;
+      const analysisId = Number(req.params.id);
 
-      if (!ObjectId.isValid(id)) {
+      if (!Number.isInteger(analysisId) || analysisId <= 0) {
         return res.status(400).json({
           success: false,
           message: "Invalid analysis ID.",
         });
       }
 
-      const analysis =
-        await getAnalysisById(
-          new ObjectId(id),
-          req.user.userId
-        );
+      const analysis = await getAnalysisById(
+        analysisId,
+        Number(req.user.userId)
+      );
 
       if (!analysis) {
         return res.status(404).json({
@@ -147,17 +136,14 @@ router.get(
         });
       }
 
-      res.json({
+      return res.json({
         success: true,
         analysis,
       });
     } catch (error) {
-      console.error(
-        "Get analysis error:",
-        error
-      );
+      console.error("Get analysis error:", error);
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: "Failed to load analysis.",
       });

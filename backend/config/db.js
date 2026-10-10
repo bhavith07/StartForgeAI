@@ -1,35 +1,61 @@
-import { MongoClient } from "mongodb";
+import pg from "pg";
+import dotenv from "dotenv";
 
-const uri = process.env.MONGODB_URI;
+dotenv.config();
 
-if (!uri) {
-  throw new Error("MONGODB_URI is missing from .env");
+const { Pool } = pg;
+
+const requiredVariables = [
+  "DB_HOST",
+  "DB_USER",
+  "DB_PASSWORD",
+  "DB_NAME",
+];
+
+for (const variable of requiredVariables) {
+  if (!process.env[variable]) {
+    console.error(
+      `❌ Missing environment variable: ${variable}`
+    );
+  }
 }
 
-const client = new MongoClient(uri);
+const pool = new Pool({
+  host: process.env.DB_HOST || "localhost",
+  port: Number(process.env.DB_PORT || 5432),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
 
-let db;
+pool.on("error", (error) => {
+  console.error("❌ Unexpected PostgreSQL pool error:", error.message);
+});
 
 export async function connectDB() {
   try {
-    await client.connect();
+    for (const variable of requiredVariables) {
+      if (!process.env[variable]) {
+        throw new Error(
+          `${variable} is missing or empty in backend/.env`
+        );
+      }
+    }
 
-    db = client.db("StartForgeAI");
+    const client = await pool.connect();
 
-    console.log("✅ MongoDB connected successfully");
+    console.log("✅ PostgreSQL connected successfully");
 
-    return db;
+    client.release();
   } catch (error) {
-    console.error("❌ MongoDB connection failed:");
-    console.error(error);
+    console.error("❌ PostgreSQL connection failed:");
+    console.error(error.message);
     throw error;
   }
 }
 
 export function getDB() {
-  if (!db) {
-    throw new Error("Database is not connected");
-  }
-
-  return db;
+  return pool;
 }
+
+export default pool;

@@ -17,6 +17,7 @@ router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    // Validate fields
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -24,6 +25,7 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    // Validate password
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
@@ -31,6 +33,7 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    // Check existing user
     const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
@@ -40,8 +43,10 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create user
     const user = await createUser({
       name: name.trim(),
       email: email.toLowerCase().trim(),
@@ -49,11 +54,11 @@ router.post("/register", async (req, res) => {
       createdAt: new Date(),
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "User registered successfully.",
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
       },
@@ -61,7 +66,7 @@ router.post("/register", async (req, res) => {
   } catch (error) {
     console.error("Registration error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error during registration.",
     });
@@ -115,7 +120,7 @@ router.post("/login", async (req, res) => {
     // Create JWT token
     const token = jwt.sign(
       {
-        userId: user._id.toString(),
+        userId: user.id.toString(),
         email: user.email,
       },
       process.env.JWT_SECRET,
@@ -125,12 +130,12 @@ router.post("/login", async (req, res) => {
     );
 
     // Send response
-    res.json({
+    return res.json({
       success: true,
       message: "Login successful.",
       token,
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
         email: user.email,
       },
@@ -138,7 +143,7 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Login error:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server error during login.",
     });
