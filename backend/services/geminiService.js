@@ -1,49 +1,100 @@
 import "dotenv/config";
 import { GoogleGenAI } from "@google/genai";
 
-const MODEL =
-  process.env.GEMINI_MODEL || "gemini-3.8-flash";
-
-const sleep = (ms) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const TIMEOUT_MS = 45000;
+const MAX_ATTEMPTS = 2;
 
 function isTemporaryError(error) {
   const message = String(error?.message || "").toLowerCase();
+  const status = Number(error?.status || error?.code);
 
   return (
-    message.includes("503") ||
-    message.includes("unavailable") ||
-    message.includes("overloaded") ||
+    status === 429 ||
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
+    status === 504 ||
     message.includes("429") ||
     message.includes("500") ||
-    message.includes("internal server error")
+    message.includes("502") ||
+    message.includes("503") ||
+    message.includes("504") ||
+    message.includes("timeout") ||
+    message.includes("temporarily unavailable") ||
+    message.includes("overloaded") ||
+    message.includes("high demand")
   );
 }
 
-async function generateWithRetry(ai, prompt, config) {
-  const maxAttempts = 3;
+function createTimeoutError() {
+  const error = new Error(
+    "The AI request timed out after 45 seconds. Please try again."
+  );
 
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      return await ai.models.generateContent({
+  error.code = "AI_TIMEOUT";
+  return error;
+}
+
+async function generateWithTimeout(ai, prompt, config) {
+  let timeoutId;
+
+  try {
+    return await Promise.race([
+      ai.models.generateContent({
         model: MODEL,
         contents: prompt,
         config,
-      });
+      }),
+
+      new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(createTimeoutError());
+        }, TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function generateWithRetry(ai, prompt, config) {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      console.log(
+        `Gemini request started. Model: ${MODEL}. Attempt: ${attempt}`
+      );
+
+      const response = await generateWithTimeout(
+        ai,
+        prompt,
+        config
+      );
+
+      console.log("Gemini response received successfully.");
+
+      return response;
     } catch (error) {
-      if (!isTemporaryError(error) || attempt === maxAttempts) {
+      console.error(
+        `Gemini attempt ${attempt} failed:`,
+        error.message
+      );
+
+      if (
+        error.code === "AI_TIMEOUT" ||
+        !isTemporaryError(error) ||
+        attempt === MAX_ATTEMPTS
+      ) {
         throw error;
       }
 
-      const delay = 1000 * 2 ** (attempt - 1);
-
-      console.log(
-        `Gemini temporarily unavailable. Retry ${attempt + 1}/${maxAttempts} in ${delay}ms.`
+      await new Promise((resolve) =>
+        setTimeout(resolve, 1500)
       );
-
-      await sleep(delay);
     }
   }
+
+  throw new Error("AI analysis failed after retrying.");
 }
 
 export async function analyzeStartup(data) {
@@ -70,41 +121,16 @@ Industry: ${data.industry}
 Target Audience: ${data.audience}
 Business Model: ${data.model}
 
-Return only valid JSON with this structure:
+Return only valid JSON matching the supplied schema.
 
-{
-  "startupScore": 0,
-  "marketPotential": "",
-  "targetMarket": "",
-  "growthPotential": "",
-  "competition": "",
-  "estimatedCost": "",
-  "marketChallenges": [],
-  "competitors": [
-    {
-      "name": "",
-      "description": "",
-      "strength": "",
-      "weakness": ""
-    }
-  ],
-  "competitorStrengths": [],
-  "competitorWeaknesses": [],
-  "differentiationOpportunities": [],
-  "strengths": [],
-  "weaknesses": [],
-  "suggestions": []
-}
-
-Rules:
-- Score must be an integer from 0 to 100.
-- Provide realistic, actionable analysis.
-- Include 3 to 5 potential competitors or comparable businesses.
-- Clearly distinguish potential competitors from verified research.
-- Do not invent exact market statistics.
-- Provide at least 3 items in each list.
-- Estimated cost should be an approximate MVP cost range in INR.
-- Return no Markdown or text outside the JSON.
+Provide realistic and actionable analysis.
+The startup score must be an integer from 0 to 100.
+Include 3 to 5 potential competitors or comparable businesses.
+Clearly distinguish potential competitors from verified research.
+Do not invent exact market statistics.
+Provide at least 3 items in each list.
+Estimated cost must be an approximate MVP cost range in INR.
+Return no Markdown or text outside the JSON.
 `;
 
   const schema = {
@@ -200,7 +226,6 @@ Rules:
       throw new Error("Gemini returned an empty response.");
     }
 
-    // Verify that the generated response is valid JSON.
     const parsed = JSON.parse(response.text);
 
     if (
@@ -211,9 +236,15 @@ Rules:
       throw new Error("Gemini returned an invalid startup score.");
     }
 
+    console.log("Startup analysis generated successfully.");
+
     return JSON.stringify(parsed);
   } catch (error) {
-    console.error("Gemini analysis failed:", error.message);
+    console.error("Startup analysis failed:", error.message);
+
+    if (error.code === "AI_TIMEOUT") {
+      throw error;
+    }
 
     if (isTemporaryError(error)) {
       throw new Error(

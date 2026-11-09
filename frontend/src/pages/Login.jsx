@@ -56,33 +56,33 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center px-6">
-      <div className="w-full max-w-md">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-teal-50 via-white to-cyan-50 px-6 py-12 text-slate-900">
+      <div className="relative w-full max-w-md">
 
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🚀</div>
 
-          <h1 className="text-4xl font-bold text-cyan-400">
+          <h1 className="text-4xl font-bold text-teal-700">
             StartForge AI
           </h1>
 
-          <p className="text-gray-400 mt-2">
+          <p className="text-slate-600 mt-2">
             Login to your account
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-slate-900 border border-slate-800 rounded-2xl p-8 space-y-5"
+          className="space-y-5 rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/60 sm:p-10"
         >
           {error && (
-            <div className="bg-red-500/10 border border-red-500 text-red-400 rounded-lg p-3">
+            <div className="bg-rose-50 border border-red-500 text-rose-700 rounded-lg p-3">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-gray-300 mb-2">
+            <label className="block text-slate-700 mb-2">
               Email
             </label>
 
@@ -93,12 +93,12 @@ export default function Login() {
               onChange={handleChange}
               placeholder="Enter your email"
               required
-              className="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:border-cyan-400 outline-none"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
             />
           </div>
 
           <div>
-            <label className="block text-gray-300 mb-2">
+            <label className="block text-slate-700 mb-2">
               Password
             </label>
 
@@ -109,23 +109,23 @@ export default function Login() {
               onChange={handleChange}
               placeholder="Enter your password"
               required
-              className="w-full p-4 rounded-xl bg-slate-800 border border-slate-700 focus:border-cyan-400 outline-none"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 transition rounded-xl py-4 font-bold text-lg"
+            className="w-full rounded-xl bg-teal-600 py-4 text-lg font-bold text-white shadow-lg shadow-teal-600/20 transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Logging in..." : "🔐 Login"}
           </button>
 
-          <p className="text-center text-gray-400">
+          <p className="text-center text-slate-600">
             Don't have an account?{" "}
             <Link
               to="/register"
-              className="text-cyan-400 hover:text-cyan-300"
+              className="text-teal-700 hover:text-teal-700"
             >
               Register
             </Link>

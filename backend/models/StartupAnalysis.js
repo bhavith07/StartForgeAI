@@ -1,9 +1,5 @@
 import { getDB } from "../config/db.js";
 
-// ==========================================
-// CREATE STARTUP ANALYSIS
-// ==========================================
-
 export async function createAnalysis(analysis) {
   const db = getDB();
 
@@ -20,15 +16,21 @@ export async function createAnalysis(analysis) {
       market_potential,
       competition,
       estimated_cost,
+      target_market,
+      growth_potential,
+      market_challenges,
+      competitors,
+      competitor_strengths,
+      competitor_weaknesses,
+      differentiation_opportunities,
       strengths,
       weaknesses,
       suggestions,
       created_at
     )
     VALUES (
-      $1, $2, $3, $4, $5, $6,
-      $7, $8, $9, $10,
-      $11, $12, $13, $14
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+      $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
     )
     RETURNING *
     `,
@@ -43,6 +45,13 @@ export async function createAnalysis(analysis) {
       analysis.marketPotential,
       analysis.competition,
       analysis.estimatedCost,
+      analysis.targetMarket || "",
+      analysis.growthPotential || "",
+      JSON.stringify(analysis.marketChallenges || []),
+      JSON.stringify(analysis.competitors || []),
+      JSON.stringify(analysis.competitorStrengths || []),
+      JSON.stringify(analysis.competitorWeaknesses || []),
+      JSON.stringify(analysis.differentiationOpportunities || []),
       JSON.stringify(analysis.strengths || []),
       JSON.stringify(analysis.weaknesses || []),
       JSON.stringify(analysis.suggestions || []),
@@ -52,10 +61,6 @@ export async function createAnalysis(analysis) {
 
   return result.rows[0];
 }
-
-// ==========================================
-// GET USER ANALYSIS HISTORY
-// ==========================================
 
 export async function getUserAnalyses(userId) {
   const db = getDB();
@@ -72,10 +77,6 @@ export async function getUserAnalyses(userId) {
 
   return result.rows;
 }
-
-// ==========================================
-// GET SINGLE ANALYSIS
-// ==========================================
 
 export async function getAnalysisById(analysisId, userId) {
   const db = getDB();

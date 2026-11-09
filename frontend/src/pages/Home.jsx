@@ -7,26 +7,15 @@ import IdeaForm from "../components/IdeaForm";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-white text-slate-900">
       <Navbar />
 
       <Hero />
 
-      <section id="features">
-        <Features />
-      </section>
-
-      <section id="how-it-works">
-        <HowItWorks />
-      </section>
-
-      <section id="demo">
-        <AIDemo />
-      </section>
-
-      <section id="demo">
-        <IdeaForm />
-      </section>
+      <Features />
+      <HowItWorks />
+      <AIDemo />
+      <IdeaForm />
     </div>
   );
 }
