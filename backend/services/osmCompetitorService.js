@@ -1,73 +1,25 @@
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
-const OVERPASS_URLS = [
-  "https://overpass-api.de/api/interpreter",
-  "https://overpass.kumi.systems/api/interpreter",
+const OVERPASS_PRIMARY = "https://overpass-api.de/api/interpreter";
+const OVERPASS_BACKUP = "https://overpass.kumi.systems/api/interpreter";
+
+const INDUSTRY_FILTERS = [
+  { pattern: /restaurant|food|beverage|cafe|café|bakery/, selector: '["amenity"~"restaurant|cafe|fast_food|food_court"]' },
+  { pattern: /education|learning|school|college|training/, selector: '["amenity"~"school|college|university|training"]' },
+  { pattern: /health|medical|hospital|clinic|pharma/, selector: '["amenity"~"hospital|clinic|doctors|dentist|pharmacy"]' },
+  { pattern: /fitness|gym|sport/, selector: '["leisure"~"fitness_centre|sports_centre"]' },
+  { pattern: /beauty|salon|cosmetic/, selector: '["shop"~"beauty|hairdresser|cosmetics"]' },
+  { pattern: /technology|software|information technology|it services|computer/, selector: '["shop"~"computer|electronics|mobile_phone"]' },
+  { pattern: /retail|shopping|e.?commerce/, selector: '["shop"]' },
+  { pattern: /service|consult/, selector: '["office"]' },
 ];
 
-const INDUSTRY_TAGS = {
-  food: [
-    ['["amenity"~"restaurant|cafe|fast_food|food_court|bar|pub"]'],
-    ['["shop"~"bakery|confectionery|supermarket|convenience|greengrocer"]'],
-  ],
-  restaurant: [
-    ['["amenity"~"restaurant|fast_food|food_court"]'],
-  ],
-  cafe: [
-    ['["amenity"="cafe"]'],
-  ],
-  retail: [
-    ['["shop"]'],
-  ],
-  ecommerce: [
-    ['["shop"]'],
-  ],
-  education: [
-    ['["amenity"~"school|college|university|training"]'],
-    ['["office"="educational_institution"]'],
-  ],
-  healthcare: [
-    ['["amenity"~"hospital|clinic|doctors|dentist|pharmacy"]'],
-    ['["healthcare"]'],
-  ],
-  fitness: [
-    ['["leisure"~"fitness_centre|sports_centre"]'],
-    ['["sport"]'],
-  ],
-  beauty: [
-    ['["shop"~"beauty|hairdresser|cosmetics"]'],
-    ['["craft"="beauty"]'],
-  ],
-  technology: [
-    ['["office"~"it|company|software"]'],
-    ['["shop"~"computer|electronics|mobile_phone"]'],
-  ],
-  services: [
-    ['["office"]'],
-    ['["craft"]'],
-  ],
-  general: [
-    ['["shop"]'],
-    ['["amenity"~"restaurant|cafe|clinic|school|bank|fuel|marketplace"]'],
-    ['["office"="company"]'],
-  ],
-};
-
-function normalizeIndustry(industry = "") {
-  const value = industry.toLowerCase();
-  if (/food|beverage|restaurant|cafe|café|bakery/.test(value)) return "food";
-  if (/e.?commerce|retail|shopping/.test(value)) return "retail";
-  if (/education|learning|school|training/.test(value)) return "education";
-  if (/health|medical|hospital|clinic|pharma/.test(value)) return "healthcare";
-  if (/fitness|gym|sport/.test(value)) return "fitness";
-  if (/beauty|salon|cosmetic/.test(value)) return "beauty";
-  if (/technology|software|information technology|it services|computer/.test(value)) return "technology";
-  if (/restaurant/.test(value)) return "restaurant";
-  if (/cafe|café/.test(value)) return "cafe";
-  if (/service|consult/.test(value)) return "services";
-  return "general";
+function getIndustrySelector(industry = "") {
+  const normalized = industry.toLowerCase().trim();
+  const match = INDUSTRY_FILTERS.find((item) => item.pattern.test(normalized));
+  return match?.selector || '["shop"]';
 }
 
-async function fetchWithTimeout(url, options = {}, timeoutMs = 55000) {
+async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -92,7 +44,7 @@ async function geocodeLocation(location) {
   }, 15000);
 
   if (!response.ok) {
-    throw new Error("Location lookup is temporarily unavailable. Please try again.");
+    throw new Error(`Location lookup failed with HTTP ${response.status}. Please try again.`);
   }
 
   const results = await response.json();
@@ -107,18 +59,17 @@ async function geocodeLocation(location) {
     latitude: Number(place.lat),
     longitude: Number(place.lon),
     displayName: place.display_name,
-    boundingBox: place.boundingbox,
   };
 }
 
 function buildOverpassQuery(latitude, longitude, radius, industry) {
-  const key = normalizeIndustry(industry);
-  const selectors = INDUSTRY_TAGS[key] || INDUSTRY_TAGS.general;
-  const clauses = selectors.flat().map((selector) =>
-    `nwr(around:${radius},${latitude},${longitude})["name"]${selector};`
-  );
-
-  return `[out:json][timeout:45];( ${clauses.join(" ")} );out center tags 80;`;
+  const selector = getIndustrySelector(industry);
+  // Search nodes and ways only. Relations are deliberately excluded to keep
+  // public Overpass requests smaller and faster.
+  return `[out:json][timeout:20];(
+    node(around:${radius},${latitude},${longitude})${selector}["name"];
+    way(around:${radius},${latitude},${longitude})${selector}["name"];
+  );out center tags 60;`;
 }
 
 function toBusiness(element) {
@@ -139,14 +90,8 @@ function toBusiness(element) {
   ].filter(Boolean);
 
   const category =
-    tags.amenity ||
-    tags.shop ||
-    tags.office ||
-    tags.healthcare ||
-    tags.leisure ||
-    tags.craft ||
-    tags.tourism ||
-    "business";
+    tags.amenity || tags.shop || tags.office || tags.healthcare ||
+    tags.leisure || tags.craft || tags.tourism || "business";
 
   return {
     id: `${element.type}/${element.id}`,
@@ -165,37 +110,42 @@ function toBusiness(element) {
   };
 }
 
+async function requestOverpass(endpoint, query) {
+  const response = await fetchWithTimeout(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": "StartForgeAI/1.0 (competitor research)",
+      "Accept": "application/json",
+    },
+    body: `data=${encodeURIComponent(query)}`,
+  }, 25000);
+
+  if (!response.ok) {
+    const error = new Error(`OpenStreetMap search returned HTTP ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+  return Array.isArray(data.elements) ? data.elements : [];
+}
+
 async function queryOverpass(query) {
-  let lastError;
-
-  for (const endpoint of OVERPASS_URLS) {
+  try {
+    return await requestOverpass(OVERPASS_PRIMARY, query);
+  } catch (primaryError) {
+    console.warn("Primary Overpass endpoint failed:", primaryError.message);
     try {
-      const response = await fetchWithTimeout(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-          "User-Agent": "StartForgeAI/1.0",
-          "Accept": "application/json",
-        },
-        body: new URLSearchParams({ data: query }).toString(),
-      });
-
-      if (!response.ok) {
-        lastError = new Error(`OpenStreetMap search returned status ${response.status}`);
-        continue;
+      return await requestOverpass(OVERPASS_BACKUP, query);
+    } catch (backupError) {
+      console.error("Backup Overpass endpoint failed:", backupError.message);
+      if (primaryError.name === "AbortError" || backupError.name === "AbortError") {
+        throw new Error("The OpenStreetMap search timed out. Try a smaller radius or try again later.");
       }
-
-      const data = await response.json();
-      return Array.isArray(data.elements) ? data.elements : [];
-    } catch (error) {
-      lastError = error;
+      throw new Error(primaryError.message || backupError.message || "Competitor search is temporarily unavailable.");
     }
   }
-
-  if (lastError?.name === "AbortError") {
-    throw new Error("The OpenStreetMap search took too long. Please try a smaller radius, such as 3 km or 5 km.");
-  }
-  throw lastError || new Error("Competitor search is temporarily unavailable.");
 }
 
 export async function searchOpenStreetMapCompetitors({ industry, location, radius = 5000 }) {
@@ -218,7 +168,7 @@ export async function searchOpenStreetMapCompetitors({ industry, location, radiu
       seen.add(business.id);
       return true;
     })
-    .slice(0, 80);
+    .slice(0, 60);
 
   return {
     location: place.displayName,
