@@ -190,12 +190,20 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <button
-              onClick={() => navigate("/")}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-teal-600/20 transition hover:-translate-y-0.5 hover:bg-teal-700"
-            >
-              <Plus size={18} /> Analyze New Startup
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => navigate("/dashboard/competitors")}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-teal-200 bg-white px-5 py-3.5 text-sm font-bold text-teal-700 transition hover:-translate-y-0.5 hover:bg-teal-50"
+              >
+                <FileSearch size={18} /> Find Competitors
+              </button>
+              <button
+                onClick={() => navigate("/")}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-teal-600/20 transition hover:-translate-y-0.5 hover:bg-teal-700"
+              >
+                <Plus size={18} /> Analyze New Startup
+              </button>
+            </div>
           </div>
         </section>
 
