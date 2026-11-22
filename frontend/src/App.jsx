@@ -5,58 +5,31 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AnalysisDetails from "./pages/AnalysisDetails";
+import CompetitorAnalysis from "./pages/CompetitorAnalysis";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   return (
     <Routes>
-
-      {/* ================================
-          PUBLIC PAGES
-      ================================= */}
-
-      <Route
-        path="/"
-        element={<Home />}
-      />
-
-      <Route
-        path="/login"
-        element={<Login />}
-      />
-
-      <Route
-        path="/register"
-        element={<Register />}
-      />
-
-      {/* ================================
-          PROTECTED DASHBOARD
-      ================================= */}
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
       <Route
         path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
       />
-
-      {/* ================================
-          PROTECTED ANALYSIS DETAILS
-      ================================= */}
 
       <Route
         path="/dashboard/analysis/:id"
-        element={
-          <ProtectedRoute>
-            <AnalysisDetails />
-          </ProtectedRoute>
-        }
+        element={<ProtectedRoute><AnalysisDetails /></ProtectedRoute>}
       />
 
+      <Route
+        path="/dashboard/competitors"
+        element={<ProtectedRoute><CompetitorAnalysis /></ProtectedRoute>}
+      />
     </Routes>
   );
 }
