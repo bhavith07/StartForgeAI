@@ -64,12 +64,8 @@ async function geocodeLocation(location) {
 
 function buildOverpassQuery(latitude, longitude, radius, industry) {
   const selector = getIndustrySelector(industry);
-  // Search nodes and ways only. Relations are deliberately excluded to keep
-  // public Overpass requests smaller and faster.
-  return `[out:json][timeout:20];(
-    node(around:${radius},${latitude},${longitude})${selector}["name"];
-    way(around:${radius},${latitude},${longitude})${selector}["name"];
-  );out center tags 60;`;
+  // Start with the lightweight node-only query that was verified manually.
+  return `[out:json][timeout:20];node(around:${radius},${latitude},${longitude})${selector}["name"];out 20;`;
 }
 
 function toBusiness(element) {
@@ -132,20 +128,24 @@ async function requestOverpass(endpoint, query) {
 }
 
 async function queryOverpass(query) {
-  try {
-    return await requestOverpass(OVERPASS_PRIMARY, query);
-  } catch (primaryError) {
-    console.warn("Primary Overpass endpoint failed:", primaryError.message);
-    try {
-      return await requestOverpass(OVERPASS_BACKUP, query);
-    } catch (backupError) {
-      console.error("Backup Overpass endpoint failed:", backupError.message);
-      if (primaryError.name === "AbortError" || backupError.name === "AbortError") {
-        throw new Error("The OpenStreetMap search timed out. Try a smaller radius or try again later.");
-      }
-      throw new Error(primaryError.message || backupError.message || "Competitor search is temporarily unavailable.");
-    }
+  // Use the endpoint confirmed working by the manual PowerShell test.
+  const body = new URLSearchParams({ data: query }).toString();
+  const response = await fetchWithTimeout(OVERPASS_PRIMARY, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": "StartForgeAI/1.0 (competitor research)",
+      "Accept": "application/json",
+    },
+    body,
+  }, 30000);
+
+  if (!response.ok) {
+    throw new Error(`OpenStreetMap search returned HTTP ${response.status}`);
   }
+
+  const data = await response.json();
+  return Array.isArray(data.elements) ? data.elements : [];
 }
 
 export async function searchOpenStreetMapCompetitors({ industry, location, radius = 5000 }) {
