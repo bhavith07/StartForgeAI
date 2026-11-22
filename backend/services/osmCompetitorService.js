@@ -321,7 +321,7 @@ async function searchWithPhoton({ industry, place, radius }) {
   // Photon reverse geocoding supports OSM tag filters and returns nearby
   // matching objects. Query each tag separately so alternatives are ORed.
   for (const tag of tags) {
-    const url = new URL(PHOTON_URL.replace(/\\/$/, "") + "/reverse");
+    const url = new URL("https://photon.komoot.io/reverse");
     url.searchParams.set("lat", String(place.latitude));
     url.searchParams.set("lon", String(place.longitude));
     url.searchParams.set("osm_tag", tag);
