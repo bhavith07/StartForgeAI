@@ -7,6 +7,7 @@ import express from "express";
 
 import analyzeRoutes from "./routes/analyzeRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import competitorRoutes from "./routes/competitorRoutes.js";
 
 import { connectDB } from "./config/db.js";
 
@@ -18,6 +19,7 @@ app.use(express.json());
 // API routes
 app.use("/api/analyze", analyzeRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/competitors", competitorRoutes);
 
 // Test route
 app.get("/", (req, res) => {
