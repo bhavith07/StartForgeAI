@@ -1,5 +1,8 @@
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
 const PHOTON_URL = "https://photon.komoot.io/api/";
+const geocodeCache = new Map();
+const competitorCache = new Map();
+
 const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
@@ -34,35 +37,80 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 12000) {
 }
 
 async function geocodeLocation(location) {
-  const url = new URL(NOMINATIM_URL);
-  url.searchParams.set("q", location);
-  url.searchParams.set("format", "jsonv2");
-  url.searchParams.set("limit", "1");
+  const cacheKey = location.toLowerCase().trim();
+  const cached = geocodeCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.place;
 
-  const response = await fetchWithTimeout(url, {
-    headers: {
-      "User-Agent": "StartForgeAI/1.0 (competitor research feature)",
-      "Accept": "application/json",
-    },
-  }, 20000);
+  try {
+    const url = new URL(NOMINATIM_URL);
+    url.searchParams.set("q", location);
+    url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("limit", "1");
 
-  if (!response.ok) {
-    throw new Error(`Location lookup failed with HTTP ${response.status}. Please try again.`);
+    const response = await fetchWithTimeout(url, {
+      headers: {
+        "User-Agent": "StartForgeAI/1.0 (competitor research feature)",
+        "Accept": "application/json",
+      },
+    }, 15000);
+
+    if (!response.ok) {
+      throw new Error(`Nominatim returned HTTP ${response.status}`);
+    }
+
+    const results = await response.json();
+    if (!Array.isArray(results) || results.length === 0) {
+      throw new Error("Nominatim did not find this location.");
+    }
+
+    const result = results[0];
+    const place = {
+      latitude: Number(result.lat),
+      longitude: Number(result.lon),
+      displayName: result.display_name,
+    };
+    geocodeCache.set(cacheKey, { place, expiresAt: Date.now() + 24 * 60 * 60 * 1000 });
+    return place;
+  } catch (nominatimError) {
+    console.warn("[Competitors] Nominatim unavailable; trying Photon geocoding:", nominatimError.message);
+    const url = new URL(PHOTON_URL);
+    url.searchParams.set("q", location);
+    url.searchParams.set("limit", "1");
+    const response = await fetchWithTimeout(url, {
+      headers: {
+        "User-Agent": "StartForgeAI/1.0 (competitor research feature)",
+        "Accept": "application/geo+json, application/json",
+      },
+    }, 10000);
+
+    if (!response.ok) {
+      throw new Error("We couldn't look up that location. Please check the city or area name and try again.");
+    }
+
+    const data = await response.json();
+    const feature = data.features?.[0];
+    const coordinates = feature?.geometry?.coordinates;
+    if (!coordinates || !Number.isFinite(Number(coordinates[0])) || !Number.isFinite(Number(coordinates[1]))) {
+      const error = new Error("We couldn't find that location. Try a city, town or area name.");
+      error.status = 404;
+      throw error;
+    }
+
+    const properties = feature.properties || {};
+    const displayName = [
+      properties.name,
+      properties.city,
+      properties.state,
+      properties.country,
+    ].filter(Boolean).filter((value, index, values) => values.indexOf(value) === index).join(", ");
+    const place = {
+      longitude: Number(coordinates[0]),
+      latitude: Number(coordinates[1]),
+      displayName: displayName || location,
+    };
+    geocodeCache.set(cacheKey, { place, expiresAt: Date.now() + 24 * 60 * 60 * 1000 });
+    return place;
   }
-
-  const results = await response.json();
-  if (!Array.isArray(results) || results.length === 0) {
-    const error = new Error("We couldn't find that location. Try a city, town or area name.");
-    error.status = 404;
-    throw error;
-  }
-
-  const place = results[0];
-  return {
-    latitude: Number(place.lat),
-    longitude: Number(place.lon),
-    displayName: place.display_name,
-  };
 }
 
 function buildOverpassQuery(latitude, longitude, radius, industry) {
@@ -263,6 +311,13 @@ function uniqueBusinesses(items) {
 }
 
 export async function searchOpenStreetMapCompetitors({ industry, location, radius = 5000 }) {
+  const cacheKey = `${industry.toLowerCase().trim()}|${location.toLowerCase().trim()}|${radius}`;
+  const cached = competitorCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    console.log("[Competitors] Returning cached competitor results.");
+    return cached.result;
+  }
+
   console.log("[Competitors] Geocoding location:", location);
   const place = await geocodeLocation(location);
   console.log("[Competitors] Geocoded:", place.latitude, place.longitude);
@@ -308,7 +363,7 @@ export async function searchOpenStreetMapCompetitors({ industry, location, radiu
 
   const unique = uniqueBusinesses(businesses);
 
-  return {
+  const result = {
     location: place.displayName,
     coordinates: {
       latitude: place.latitude,
@@ -324,4 +379,11 @@ export async function searchOpenStreetMapCompetitors({ industry, location, radiu
       ? "Overpass was unavailable, so these are limited search matches from Photon using OpenStreetMap data. They are not a complete list of nearby competitors. Coverage may be incomplete; ratings and customer reviews are not provided."
       : "Results are based on OpenStreetMap community data. Coverage may be incomplete. Ratings and customer reviews are not provided by this search.",
   };
+
+  competitorCache.set(cacheKey, { result, expiresAt: Date.now() + 15 * 60 * 1000 });
+  if (competitorCache.size > 300) {
+    const oldestKey = competitorCache.keys().next().value;
+    competitorCache.delete(oldestKey);
+  }
+  return result;
 }
