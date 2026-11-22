@@ -118,7 +118,7 @@ function buildOverpassQuery(latitude, longitude, radius, industry) {
     `nwr(around:${radius},${latitude},${longitude})["name"]${selector};`
   );
 
-  return `[out:json][timeout:25];( ${clauses.join(" ")} );out center tags;`;
+  return `[out:json][timeout:45];( ${clauses.join(" ")} );out center tags 80;`;
 }
 
 function toBusiness(element) {
@@ -192,6 +192,9 @@ async function queryOverpass(query) {
     }
   }
 
+  if (lastError?.name === "AbortError") {
+    throw new Error("The OpenStreetMap search took too long. Please try a smaller radius, such as 3 km or 5 km.");
+  }
   throw lastError || new Error("Competitor search is temporarily unavailable.");
 }
 
