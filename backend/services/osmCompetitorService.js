@@ -1,6 +1,9 @@
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
-const OVERPASS_PRIMARY = "https://overpass-api.de/api/interpreter";
-const OVERPASS_BACKUP = "https://overpass.kumi.systems/api/interpreter";
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+];
 
 const INDUSTRY_FILTERS = [
   { pattern: /restaurant|food|beverage|cafe|café|bakery/, selector: '["amenity"~"restaurant|cafe|fast_food|food_court"]' },
@@ -130,24 +133,43 @@ async function requestOverpass(endpoint, query) {
 }
 
 async function queryOverpass(query) {
-  // Use the endpoint confirmed working by the manual PowerShell test.
   const body = new URLSearchParams({ data: query }).toString();
-  const response = await fetchWithTimeout(OVERPASS_PRIMARY, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "User-Agent": "StartForgeAI/1.0 (competitor research)",
-      "Accept": "application/json",
-    },
-    body,
-  }, 45000);
+  const failures = [];
 
-  if (!response.ok) {
-    throw new Error(`OpenStreetMap search returned HTTP ${response.status}`);
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    try {
+      console.log("[Competitors] Trying Overpass endpoint:", endpoint);
+      const response = await fetchWithTimeout(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "User-Agent": "StartForgeAI/1.0 (competitor research)",
+          "Accept": "application/json",
+        },
+        body,
+      }, 30000);
+
+      if (!response.ok) {
+        const detail = await response.text().catch(() => "");
+        const message = `HTTP ${response.status}${detail ? ": " + detail.slice(0, 180) : ""}`;
+        failures.push(`${endpoint} -> ${message}`);
+        console.warn("[Competitors] Overpass endpoint failed:", message);
+        if (response.status === 429 || response.status >= 500) continue;
+        throw new Error(`OpenStreetMap search failed: ${message}`);
+      }
+
+      const data = await response.json();
+      return Array.isArray(data.elements) ? data.elements : [];
+    } catch (error) {
+      failures.push(`${endpoint} -> ${error.message}`);
+      console.warn("[Competitors] Overpass endpoint request failed:", error.message);
+    }
   }
 
-  const data = await response.json();
-  return Array.isArray(data.elements) ? data.elements : [];
+  throw new Error(
+    "All public OpenStreetMap search servers are currently unavailable. Please wait a minute and try again. " +
+    failures.join(" | ")
+  );
 }
 
 export async function searchOpenStreetMapCompetitors({ industry, location, radius = 5000 }) {
