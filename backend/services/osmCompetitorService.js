@@ -258,30 +258,93 @@ function photonFeatureToBusiness(feature, index) {
   };
 }
 
+function getPhotonTags(industry = "") {
+  const normalized = industry.toLowerCase().trim();
+
+  if (/restaurant|food|beverage|cafe|café|bakery/.test(normalized)) {
+    return [
+      "amenity:restaurant",
+      "amenity:cafe",
+      "amenity:fast_food",
+      "amenity:food_court",
+    ];
+  }
+  if (/education|learning|school|college|training/.test(normalized)) {
+    return [
+      "amenity:school",
+      "amenity:college",
+      "amenity:university",
+    ];
+  }
+  if (/health|medical|hospital|clinic|pharma/.test(normalized)) {
+    return [
+      "amenity:hospital",
+      "amenity:clinic",
+      "amenity:doctors",
+      "amenity:dentist",
+      "amenity:pharmacy",
+    ];
+  }
+  if (/fitness|gym|sport/.test(normalized)) {
+    return [
+      "leisure:fitness_centre",
+      "leisure:sports_centre",
+    ];
+  }
+  if (/beauty|salon|cosmetic/.test(normalized)) {
+    return [
+      "shop:beauty",
+      "shop:hairdresser",
+      "shop:cosmetics",
+    ];
+  }
+  if (/technology|software|information technology|it services|computer/.test(normalized)) {
+    return [
+      "shop:computer",
+      "shop:electronics",
+      "shop:mobile_phone",
+    ];
+  }
+  if (/retail|shopping|e.?commerce/.test(normalized)) {
+    return ["shop"];
+  }
+  if (/service|consult/.test(normalized)) {
+    return ["office"];
+  }
+  return ["shop"];
+}
+
 async function searchWithPhoton({ industry, place, radius }) {
-  const url = new URL(PHOTON_URL);
-  url.searchParams.set("q", industry);
-  url.searchParams.set("lat", String(place.latitude));
-  url.searchParams.set("lon", String(place.longitude));
-  url.searchParams.set("zoom", "14");
-  url.searchParams.set("limit", "50");
-  url.searchParams.set("lang", "en");
+  const tags = getPhotonTags(industry);
+  const allFeatures = [];
 
-  console.log("[Competitors] Falling back to Photon:", url.toString());
-  const response = await fetchWithTimeout(url, {
-    headers: {
-      "User-Agent": "StartForgeAI/1.0 (competitor research feature)",
-      "Accept": "application/geo+json, application/json",
-    },
-  }, 12000);
+  // Photon reverse geocoding supports OSM tag filters and returns nearby
+  // matching objects. Query each tag separately so alternatives are ORed.
+  for (const tag of tags) {
+    const url = new URL(PHOTON_URL.replace(/\\/$/, "") + "/reverse");
+    url.searchParams.set("lat", String(place.latitude));
+    url.searchParams.set("lon", String(place.longitude));
+    url.searchParams.set("osm_tag", tag);
+    url.searchParams.set("limit", "50");
+    url.searchParams.set("lang", "en");
 
-  if (!response.ok) {
-    throw new Error(`Photon search returned HTTP ${response.status}.`);
+    console.log("[Competitors] Photon category lookup:", tag);
+    const response = await fetchWithTimeout(url, {
+      headers: {
+        "User-Agent": "StartForgeAI/1.0 (competitor research feature)",
+        "Accept": "application/geo+json, application/json",
+      },
+    }, 10000);
+
+    if (!response.ok) {
+      throw new Error(`Photon search returned HTTP ${response.status} for ${tag}.`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data.features)) allFeatures.push(...data.features);
   }
 
-  const data = await response.json();
-  const features = Array.isArray(data.features) ? data.features : [];
-  const businesses = features
+  const businesses = allFeatures
     .map(photonFeatureToBusiness)
     .filter(Boolean)
     .filter((business) =>
