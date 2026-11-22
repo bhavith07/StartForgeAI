@@ -1,4 +1,5 @@
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
+const PHOTON_URL = "https://photon.komoot.io/api/";
 const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
@@ -22,7 +23,7 @@ function getIndustrySelector(industry = "") {
   return match?.selector || '["shop"]';
 }
 
-async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
+async function fetchWithTimeout(url, options = {}, timeoutMs = 12000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -43,7 +44,7 @@ async function geocodeLocation(location) {
       "User-Agent": "StartForgeAI/1.0 (competitor research feature)",
       "Accept": "application/json",
     },
-  }, 30000);
+  }, 20000);
 
   if (!response.ok) {
     throw new Error(`Location lookup failed with HTTP ${response.status}. Please try again.`);
@@ -66,11 +67,10 @@ async function geocodeLocation(location) {
 
 function buildOverpassQuery(latitude, longitude, radius, industry) {
   const normalized = industry.toLowerCase().trim();
-  // Match the exact simple query already verified successfully from Node.js.
   const selector = /restaurant/.test(normalized)
     ? '["amenity"="restaurant"]'
     : getIndustrySelector(industry);
-  return `[out:json][timeout:25];node(around:${radius},${latitude},${longitude})${selector}["name"];out 20;`;
+  return `[out:json][timeout:20];node(around:${radius},${latitude},${longitude})${selector}["name"];out 40;`;
 }
 
 function toBusiness(element) {
@@ -111,27 +111,6 @@ function toBusiness(element) {
   };
 }
 
-async function requestOverpass(endpoint, query) {
-  const response = await fetchWithTimeout(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "User-Agent": "StartForgeAI/1.0 (competitor research)",
-      "Accept": "application/json",
-    },
-    body: `data=${encodeURIComponent(query)}`,
-  }, 25000);
-
-  if (!response.ok) {
-    const error = new Error(`OpenStreetMap search returned HTTP ${response.status}`);
-    error.status = response.status;
-    throw error;
-  }
-
-  const data = await response.json();
-  return Array.isArray(data.elements) ? data.elements : [];
-}
-
 async function queryOverpass(query) {
   const body = new URLSearchParams({ data: query }).toString();
   const failures = [];
@@ -147,11 +126,11 @@ async function queryOverpass(query) {
           "Accept": "application/json",
         },
         body,
-      }, 30000);
+      }, 10000);
 
       if (!response.ok) {
         const detail = await response.text().catch(() => "");
-        const message = `HTTP ${response.status}${detail ? ": " + detail.slice(0, 180) : ""}`;
+        const message = `HTTP ${response.status}${detail ? ": " + detail.slice(0, 140) : ""}`;
         failures.push(`${endpoint} -> ${message}`);
         console.warn("[Competitors] Overpass endpoint failed:", message);
         if (response.status === 429 || response.status >= 500) continue;
@@ -159,33 +138,138 @@ async function queryOverpass(query) {
       }
 
       const data = await response.json();
-      return Array.isArray(data.elements) ? data.elements : [];
+      return {
+        elements: Array.isArray(data.elements) ? data.elements : [],
+        provider: "Overpass API",
+      };
     } catch (error) {
       failures.push(`${endpoint} -> ${error.message}`);
       console.warn("[Competitors] Overpass endpoint request failed:", error.message);
     }
   }
 
-  throw new Error(
-    "All public OpenStreetMap search servers are currently unavailable. Please wait a minute and try again. " +
-    failures.join(" | ")
-  );
+  const error = new Error("All public Overpass endpoints failed.");
+  error.failures = failures;
+  throw error;
+}
+
+function distanceInMeters(lat1, lon1, lat2, lon2) {
+  const toRadians = (value) => (value * Math.PI) / 180;
+  const earthRadius = 6371000;
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) ** 2;
+  return 2 * earthRadius * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function photonFeatureToBusiness(feature, index) {
+  const properties = feature?.properties || {};
+  const coordinates = feature?.geometry?.coordinates;
+  const longitude = Number(coordinates?.[0]);
+  const latitude = Number(coordinates?.[1]);
+  const name = properties.name || properties["name:en"];
+
+  if (!name || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
+  const addressParts = [
+    properties.housenumber,
+    properties.street,
+    properties.district,
+    properties.city,
+    properties.state,
+  ].filter(Boolean);
+
+  const osmType = properties.osm_type;
+  const osmId = properties.osm_id;
+  const osmPath = osmType && osmId
+    ? `${osmType === "N" ? "node" : osmType === "W" ? "way" : "relation"}/${osmId}`
+    : null;
+
+  return {
+    id: osmPath || `photon/${properties.osm_key || "place"}/${properties.osm_value || index}/${latitude}/${longitude}`,
+    name,
+    category: String(properties.osm_value || properties.type || properties.osm_key || "business").replaceAll("_", " "),
+    address: addressParts.join(", ") || null,
+    latitude,
+    longitude,
+    phone: null,
+    website: null,
+    openingHours: null,
+    rating: null,
+    reviewCount: null,
+    source: "OpenStreetMap via Photon",
+    mapUrl: osmPath
+      ? `https://www.openstreetmap.org/${osmPath}`
+      : `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=18/${latitude}/${longitude}`,
+  };
+}
+
+async function searchWithPhoton({ industry, place, radius }) {
+  const url = new URL(PHOTON_URL);
+  url.searchParams.set("q", industry);
+  url.searchParams.set("lat", String(place.latitude));
+  url.searchParams.set("lon", String(place.longitude));
+  url.searchParams.set("zoom", "14");
+  url.searchParams.set("limit", "50");
+  url.searchParams.set("lang", "en");
+
+  console.log("[Competitors] Falling back to Photon:", url.toString());
+  const response = await fetchWithTimeout(url, {
+    headers: {
+      "User-Agent": "StartForgeAI/1.0 (competitor research feature)",
+      "Accept": "application/geo+json, application/json",
+    },
+  }, 12000);
+
+  if (!response.ok) {
+    throw new Error(`Photon search returned HTTP ${response.status}.`);
+  }
+
+  const data = await response.json();
+  const features = Array.isArray(data.features) ? data.features : [];
+  const businesses = features
+    .map(photonFeatureToBusiness)
+    .filter(Boolean)
+    .filter((business) =>
+      distanceInMeters(
+        place.latitude,
+        place.longitude,
+        business.latitude,
+        business.longitude
+      ) <= radius
+    );
+
+  return {
+    businesses,
+    provider: "Photon",
+  };
+}
+
+function uniqueBusinesses(items) {
+  const seen = new Set();
+  return items.filter((business) => {
+    if (!business) return false;
+    const key = business.id || `${business.name.toLowerCase()}:${business.latitude}:${business.longitude}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 60);
 }
 
 export async function searchOpenStreetMapCompetitors({ industry, location, radius = 5000 }) {
-  let place;
-  try {
-    console.log("[Competitors] Geocoding location:", location);
-    place = await geocodeLocation(location);
-    console.log("[Competitors] Geocoded:", place.latitude, place.longitude);
-  } catch (error) {
-    console.error("[Competitors] Geocoding failed:", error);
-    if (error.name === "AbortError") {
-      throw new Error("Location lookup timed out. Please try again.");
-    }
-    throw error;
-  }
+  console.log("[Competitors] Geocoding location:", location);
+  const place = await geocodeLocation(location);
+  console.log("[Competitors] Geocoded:", place.latitude, place.longitude);
 
+  let businesses = [];
+  let provider = "Overpass API";
+  let fallbackUsed = false;
   const query = buildOverpassQuery(
     place.latitude,
     place.longitude,
@@ -193,29 +277,36 @@ export async function searchOpenStreetMapCompetitors({ industry, location, radiu
     industry
   );
 
-  let elements;
   try {
     console.log("[Competitors] Querying Overpass:", industry, radius);
-    elements = await queryOverpass(query);
-    console.log("[Competitors] Overpass returned:", elements.length, "elements");
-  } catch (error) {
-    console.error("[Competitors] Overpass failed:", error);
-    if (error.name === "AbortError") {
-      throw new Error("Business search timed out. Please try a smaller radius or try again later.");
+    const result = await queryOverpass(query);
+    businesses = result.elements.map(toBusiness).filter(Boolean);
+    provider = result.provider;
+    console.log("[Competitors] Overpass returned:", businesses.length, "businesses");
+  } catch (overpassError) {
+    console.warn("[Competitors] Overpass unavailable; trying Photon fallback.");
+    try {
+      const result = await searchWithPhoton({ industry, place, radius });
+      businesses = result.businesses;
+      provider = result.provider;
+      fallbackUsed = true;
+      console.log("[Competitors] Photon returned:", businesses.length, "businesses");
+    } catch (photonError) {
+      console.error("[Competitors] Photon fallback failed:", photonError.message);
+      const error = new Error(
+        "Competitor search is temporarily unavailable. Please try again later. " +
+        "The free OpenStreetMap search providers did not respond."
+      );
+      error.status = 502;
+      error.details = {
+        overpass: overpassError.failures || [overpassError.message],
+        photon: photonError.message,
+      };
+      throw error;
     }
-    throw error;
   }
-  const seen = new Set();
 
-  const businesses = elements
-    .map(toBusiness)
-    .filter(Boolean)
-    .filter((business) => {
-      if (seen.has(business.id)) return false;
-      seen.add(business.id);
-      return true;
-    })
-    .slice(0, 60);
+  const unique = uniqueBusinesses(businesses);
 
   return {
     location: place.displayName,
@@ -225,8 +316,12 @@ export async function searchOpenStreetMapCompetitors({ industry, location, radiu
     },
     radius,
     industry,
-    total: businesses.length,
-    businesses,
-    dataNotice: "Results are based on OpenStreetMap community data. Coverage may be incomplete. Ratings and customer reviews are not provided by this search.",
+    total: unique.length,
+    businesses: unique,
+    provider,
+    fallbackUsed,
+    dataNotice: fallbackUsed
+      ? "Overpass was unavailable, so these are limited search matches from Photon using OpenStreetMap data. They are not a complete list of nearby competitors. Coverage may be incomplete; ratings and customer reviews are not provided."
+      : "Results are based on OpenStreetMap community data. Coverage may be incomplete. Ratings and customer reviews are not provided by this search.",
   };
 }
