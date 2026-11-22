@@ -118,7 +118,7 @@ function buildOverpassQuery(latitude, longitude, radius, industry) {
     `nwr(around:${radius},${latitude},${longitude})["name"]${selector};`
   );
 
-  return `[out:json][timeout:25];( ${clauses.join(" ")} );out center tags 80;`;
+  return `[out:json][timeout:25];( ${clauses.join(" ")} );out center tags;`;
 }
 
 function toBusiness(element) {
