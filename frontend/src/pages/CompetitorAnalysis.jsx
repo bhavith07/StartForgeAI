@@ -57,7 +57,7 @@ function BusinessCard({ business }) {
 
       <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
         <span className="text-xs text-slate-500">Ratings and reviews unavailable</span>
-        <span className="text-xs font-semibold text-slate-400">OSM data</span>
+        <span className="text-xs font-semibold text-slate-400">{business.source || "OpenStreetMap"}</span>
       </div>
     </article>
   );
