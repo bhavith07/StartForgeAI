@@ -34,14 +34,13 @@ async function geocodeLocation(location) {
   url.searchParams.set("q", location);
   url.searchParams.set("format", "jsonv2");
   url.searchParams.set("limit", "1");
-  url.searchParams.set("addressdetails", "1");
 
   const response = await fetchWithTimeout(url, {
     headers: {
       "User-Agent": "StartForgeAI/1.0 (competitor research feature)",
       "Accept": "application/json",
     },
-  }, 15000);
+  }, 30000);
 
   if (!response.ok) {
     throw new Error(`Location lookup failed with HTTP ${response.status}. Please try again.`);
@@ -63,9 +62,12 @@ async function geocodeLocation(location) {
 }
 
 function buildOverpassQuery(latitude, longitude, radius, industry) {
-  const selector = getIndustrySelector(industry);
-  // Start with the lightweight node-only query that was verified manually.
-  return `[out:json][timeout:20];node(around:${radius},${latitude},${longitude})${selector}["name"];out 20;`;
+  const normalized = industry.toLowerCase().trim();
+  // Match the exact simple query already verified successfully from Node.js.
+  const selector = /restaurant/.test(normalized)
+    ? '["amenity"="restaurant"]'
+    : getIndustrySelector(industry);
+  return `[out:json][timeout:25];node(around:${radius},${latitude},${longitude})${selector}["name"];out 20;`;
 }
 
 function toBusiness(element) {
@@ -138,7 +140,7 @@ async function queryOverpass(query) {
       "Accept": "application/json",
     },
     body,
-  }, 30000);
+  }, 45000);
 
   if (!response.ok) {
     throw new Error(`OpenStreetMap search returned HTTP ${response.status}`);
@@ -149,7 +151,19 @@ async function queryOverpass(query) {
 }
 
 export async function searchOpenStreetMapCompetitors({ industry, location, radius = 5000 }) {
-  const place = await geocodeLocation(location);
+  let place;
+  try {
+    console.log("[Competitors] Geocoding location:", location);
+    place = await geocodeLocation(location);
+    console.log("[Competitors] Geocoded:", place.latitude, place.longitude);
+  } catch (error) {
+    console.error("[Competitors] Geocoding failed:", error);
+    if (error.name === "AbortError") {
+      throw new Error("Location lookup timed out. Please try again.");
+    }
+    throw error;
+  }
+
   const query = buildOverpassQuery(
     place.latitude,
     place.longitude,
@@ -157,7 +171,18 @@ export async function searchOpenStreetMapCompetitors({ industry, location, radiu
     industry
   );
 
-  const elements = await queryOverpass(query);
+  let elements;
+  try {
+    console.log("[Competitors] Querying Overpass:", industry, radius);
+    elements = await queryOverpass(query);
+    console.log("[Competitors] Overpass returned:", elements.length, "elements");
+  } catch (error) {
+    console.error("[Competitors] Overpass failed:", error);
+    if (error.name === "AbortError") {
+      throw new Error("Business search timed out. Please try a smaller radius or try again later.");
+    }
+    throw error;
+  }
   const seen = new Set();
 
   const businesses = elements
