@@ -2,7 +2,6 @@ import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 import Features from "../components/Features";
 import HowItWorks from "../components/HowItWorks";
-import AIDemo from "../components/AIDemo";
 import IdeaForm from "../components/IdeaForm";
 
 export default function Home() {
@@ -14,7 +13,6 @@ export default function Home() {
 
       <Features />
       <HowItWorks />
-      <AIDemo />
       <IdeaForm />
     </div>
   );

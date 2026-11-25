@@ -1,31 +1,51 @@
-import { Brain, TrendingUp, Search, BarChart3, ArrowUpRight } from "lucide-react";
+import { BarChart3, MapPinned, FolderClock } from "lucide-react";
 
 const features = [
-  { icon: Brain, title: "Startup Validation", desc: "Evaluate your startup concept with structured AI-assisted insights." },
-  { icon: TrendingUp, title: "Market Analysis", desc: "Understand your target market, growth potential and challenges." },
-  { icon: Search, title: "Competitor Research", desc: "Explore competitors, their positioning, strengths and weaknesses." },
-  { icon: BarChart3, title: "Business Reports", desc: "Get a clear report with scores, opportunities and recommendations." },
+  {
+    icon: BarChart3,
+    number: "01",
+    title: "Assess the idea",
+    desc: "Get a structured review of market potential, competition, estimated costs, strengths and risks.",
+  },
+  {
+    icon: MapPinned,
+    number: "02",
+    title: "Look around locally",
+    desc: "Search mapped businesses by category, location and radius, then compare the results on a map.",
+  },
+  {
+    icon: FolderClock,
+    number: "03",
+    title: "Keep your research together",
+    desc: "Save startup reports and competitor searches in your workspace, and download reports as PDFs.",
+  },
 ];
 
 export default function Features() {
   return (
-    <section id="features" className="scroll-mt-24 bg-slate-50 px-6 py-24">
+    <section id="features" className="scroll-mt-24 border-y border-slate-200 bg-white px-5 py-20 sm:px-8 sm:py-24">
       <div className="mx-auto max-w-7xl">
-        <div className="mx-auto mb-14 max-w-2xl text-center">
-          <span className="text-sm font-bold uppercase tracking-[0.18em] text-teal-700">What you get</span>
-          <h2 className="mt-3 text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">Everything to shape your next big idea</h2>
-          <p className="mt-4 text-lg leading-8 text-slate-600">Useful insights to help you move from an early concept to a more informed plan.</p>
+        <div className="mb-10 grid gap-4 md:grid-cols-[0.8fr_1.2fr] md:items-end">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-800">What you can do</p>
+            <h2 className="mt-3 max-w-md text-3xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-4xl">
+              Useful groundwork for an early decision.
+            </h2>
+          </div>
+          <p className="max-w-xl text-sm leading-7 text-slate-600 md:justify-self-end md:text-base">
+            Start with a structured assessment, then add local competitor research when you have a place and category in mind.
+          </p>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map(({ icon: Icon, title, desc }) => (
-            <article key={title} className="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-teal-200 hover:shadow-xl hover:shadow-slate-200/60">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 transition group-hover:bg-teal-600 group-hover:text-white">
-                <Icon size={24} />
+        <div className="grid border-y border-slate-200 md:grid-cols-3 md:divide-x md:divide-slate-200">
+          {features.map(({ icon: Icon, number, title, desc }) => (
+            <article key={title} className="flex gap-4 border-b border-slate-200 py-6 md:border-b-0 md:px-6 md:py-7 first:md:pl-0 last:md:pr-0">
+              <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f1f6f3] text-teal-800"><Icon size={19} /></span>
+              <div>
+                <div className="flex items-center gap-2 text-[10px] font-bold tracking-wider text-slate-400"><span>{number}</span><span className="h-px w-6 bg-slate-200" /></div>
+                <h3 className="mt-2 text-base font-semibold text-slate-900">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{desc}</p>
               </div>
-              <h3 className="mt-6 text-xl font-bold text-slate-900">{title}</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-600">{desc}</p>
-              <div className="mt-6 flex items-center gap-1 text-sm font-semibold text-teal-700">Explore <ArrowUpRight size={15}/></div>
             </article>
           ))}
         </div>

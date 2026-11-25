@@ -436,25 +436,24 @@ export default function IdeaForm() {
     "mt-2 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition hover:border-slate-300 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10";
 
   return (
-    <section id="idea-form" className="scroll-mt-24 bg-slate-50 px-5 py-20 text-slate-900 sm:px-8">
+    <section id="idea-form" className="scroll-mt-24 bg-white px-5 py-20 text-slate-900 sm:px-8 sm:py-24">
       <div className="mx-auto max-w-6xl">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-800 shadow-sm">
-            <Sparkles size={15} /> Your next big idea starts here
+          <span className="text-xs font-bold uppercase tracking-[0.16em] text-teal-800">
+            Startup assessment
           </span>
-          <h2 className="mt-5 text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
-            Validate Your <span className="bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Startup</span>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+            Take a closer look at your idea.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-            Tell us about your idea. Get a structured view of its market,
-            competition, costs and potential opportunities.
+            Share a few details to get a structured report on market potential, competition, estimated costs and possible next steps.
           </p>
         </div>
 
         <div className="mt-12 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
           <form
             onSubmit={handleSubmit}
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-9"
+            className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-9"
           >
             <div className="mb-8 flex items-center gap-3 border-b border-slate-100 pb-6">
               <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
@@ -507,12 +506,13 @@ export default function IdeaForm() {
                   </label>
                   <select id="industry" name="industry" value={form.industry} onChange={handleChange} required className={selectClass}>
                     <option value="">Select industry</option>
-                    <option>Education</option>
-                    <option>Healthcare</option>
-                    <option>Finance</option>
-                    <option>E-Commerce</option>
-                    <option>AI</option>
+                    <option value="Education">Education and learning</option>
+                    <option value="Healthcare">Health and wellness</option>
+                    <option value="Finance">Finance and money</option>
+                    <option value="E-Commerce">Online shopping and selling</option>
+                    <option value="AI">Artificial intelligence (AI)</option>
                   </select>
+                  <p className="mt-2 text-xs leading-5 text-slate-500">Choose the field your idea is focused on.</p>
                 </div>
 
                 <div>
@@ -521,11 +521,12 @@ export default function IdeaForm() {
                   </label>
                   <select id="audience" name="audience" value={form.audience} onChange={handleChange} required className={selectClass}>
                     <option value="">Select audience</option>
-                    <option>Students</option>
-                    <option>Businesses</option>
-                    <option>Professionals</option>
-                    <option>General Public</option>
+                    <option value="Students">Students</option>
+                    <option value="Businesses">Businesses or companies</option>
+                    <option value="Professionals">Working professionals</option>
+                    <option value="General Public">Everyday consumers</option>
                   </select>
+                  <p className="mt-2 text-xs leading-5 text-slate-500">Who do you expect to use or pay for it?</p>
                 </div>
 
                 <div className="sm:col-span-2">
@@ -534,11 +535,12 @@ export default function IdeaForm() {
                   </label>
                   <select id="model" name="model" value={form.model} onChange={handleChange} required className={selectClass}>
                     <option value="">Select business model</option>
-                    <option>SaaS</option>
-                    <option>Subscription</option>
-                    <option>Marketplace</option>
-                    <option>Freemium</option>
+                    <option value="SaaS">Software people pay to use (SaaS)</option>
+                    <option value="Subscription">Monthly or yearly payments</option>
+                    <option value="Marketplace">Connect buyers and sellers</option>
+                    <option value="Freemium">Free basics, paid extras (freemium)</option>
                   </select>
+                  <p className="mt-2 text-xs leading-5 text-slate-500">How will the business earn money?</p>
                 </div>
               </div>
             </div>

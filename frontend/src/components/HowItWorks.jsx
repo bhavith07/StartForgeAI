@@ -1,35 +1,48 @@
-import { Lightbulb, FileText, Sparkles, Rocket, ArrowRight } from "lucide-react";
+import { ClipboardList, FileSearch, RefreshCw } from "lucide-react";
 
 const steps = [
-  { icon: Lightbulb, title: "Describe your idea", desc: "Share your startup name, concept, industry and target audience." },
-  { icon: Sparkles, title: "Analyse the opportunity", desc: "Review market potential, competition and estimated costs." },
-  { icon: FileText, title: "Explore your report", desc: "See strengths, weaknesses, differentiation and recommendations." },
-  { icon: Rocket, title: "Plan your next move", desc: "Use the insights to refine your idea and plan the next steps." },
+  {
+    icon: ClipboardList,
+    title: "Describe what you're building",
+    desc: "Add the problem, your solution, industry, audience and business model.",
+  },
+  {
+    icon: FileSearch,
+    title: "Review the assessment",
+    desc: "Read the market and competition overview, estimated costs, risks and recommendations.",
+  },
+  {
+    icon: RefreshCw,
+    title: "Research and refine",
+    desc: "Explore nearby mapped businesses, save your findings and revisit the idea as it develops.",
+  },
 ];
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="scroll-mt-24 bg-white px-6 py-24">
-      <div className="mx-auto max-w-7xl">
-        <div className="mx-auto mb-14 max-w-2xl text-center">
-          <span className="text-sm font-bold uppercase tracking-[0.18em] text-teal-700">Simple process</span>
-          <h2 className="mt-3 text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">From idea to insight in four steps</h2>
-          <p className="mt-4 text-lg text-slate-600">A straightforward workflow to help you assess your startup concept.</p>
+    <section id="how-it-works" className="scroll-mt-24 bg-[#f5f8f6] px-5 py-20 sm:px-8 sm:py-24">
+      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
+        <div className="max-w-md">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-800">How it works</p>
+          <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-4xl">
+            From first draft to a more informed next step.
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
+            Start with what you know. The report helps organize what to examine next; your research and judgment still lead the decision.
+          </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <ol className="divide-y divide-slate-200 border-y border-slate-200">
           {steps.map(({ icon: Icon, title, desc }, index) => (
-            <article key={title} className="relative rounded-2xl border border-slate-200 bg-slate-50 p-7">
-              <div className="flex items-center justify-between">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-100 text-teal-700"><Icon size={24}/></span>
-                <span className="text-4xl font-black text-slate-200">0{index + 1}</span>
+            <li key={title} className="grid gap-3 py-5 sm:grid-cols-[42px_1fr] sm:gap-5 sm:py-6">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-teal-800 ring-1 ring-slate-200"><Icon size={17} /></div>
+              <div className="grid gap-1 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] sm:gap-6">
+                <h3 className="text-sm font-semibold text-slate-900"><span className="mr-2 text-xs font-medium text-slate-400">0{index + 1}</span>{title}</h3>
+                <p className="text-sm leading-6 text-slate-600">{desc}</p>
               </div>
-              <h3 className="mt-7 text-lg font-bold text-slate-900">{title}</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-600">{desc}</p>
-              {index < steps.length - 1 && <ArrowRight className="absolute -right-4 top-12 z-10 hidden text-teal-500 lg:block" size={22}/>}
-            </article>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );

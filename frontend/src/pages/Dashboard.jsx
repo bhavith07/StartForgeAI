@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   ArrowRight,
+  ArrowLeft,
   BarChart3,
   CalendarDays,
   ChartNoAxesCombined,
@@ -40,22 +41,23 @@ function scoreTone(score) {
 
 function SummaryCard({ icon: Icon, label, value, detail, tint = "teal" }) {
   const tints = {
-    teal: "bg-teal-50 text-teal-700",
-    blue: "bg-blue-50 text-blue-700",
-    violet: "bg-violet-50 text-violet-700",
+    teal: { icon: "bg-[#edf3f9] text-[#345f8a]", border: "border-l-[#345f8a]" },
+    amber: { icon: "bg-[#f7eee8] text-[#a6683e]", border: "border-l-[#c07b50]" },
+    slate: { icon: "bg-slate-100 text-slate-700", border: "border-l-slate-400" },
   };
+  const color = tints[tint] || tints.teal;
 
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article className={`rounded-xl border border-slate-200 border-l-[3px] bg-white p-5 shadow-sm ${color.border}`}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="mt-3 max-w-full truncate text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+          <p className="mt-3 max-w-full truncate text-2xl font-semibold tracking-tight text-slate-950 sm:text-[1.75rem]">
             {value}
           </p>
           {detail && <p className="mt-2 text-xs text-slate-500">{detail}</p>}
         </div>
-        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tints[tint] || tints.teal}`}>
+        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${color.icon}`}>
           <Icon size={21} />
         </span>
       </div>
@@ -66,6 +68,15 @@ function SummaryCard({ icon: Icon, label, value, detail, tint = "teal" }) {
 export default function Dashboard() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
+  const hasPreviousPage = window.history.length > 1;
+
+  function goBack() {
+    if (hasPreviousPage) {
+      navigate(-1);
+      return;
+    }
+    navigate("/");
+  }
 
   const [analyses, setAnalyses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -170,36 +181,38 @@ export default function Dashboard() {
     });
 
   return (
-    <main className="min-h-screen bg-slate-50 px-5 pb-16 pt-28 text-slate-900 sm:px-8">
+    <main className="min-h-screen bg-[#f3f5f8] px-5 pb-16 pt-28 text-slate-900 sm:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Welcome header */}
-        <section className="relative overflow-hidden rounded-3xl border border-teal-100 bg-gradient-to-br from-white via-white to-teal-50 p-7 shadow-sm sm:p-10">
-          <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-teal-100/70 blur-3xl" />
-          <div className="pointer-events-none absolute bottom-0 right-1/3 h-28 w-28 rounded-full bg-cyan-100/60 blur-2xl" />
-
-          <div className="relative flex flex-col items-start justify-between gap-7 md:flex-row md:items-center">
+        <section className="overflow-hidden rounded-2xl bg-[#25384f] p-7 text-white shadow-sm sm:p-9">
+          <button
+            type="button"
+            onClick={goBack}
+            className="mb-5 inline-flex items-center gap-2 rounded-lg border border-white/25 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            <ArrowLeft size={16} /> Back
+          </button>
+          <div className="flex flex-col items-start justify-between gap-7 lg:flex-row lg:items-center">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-teal-100 bg-white/90 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-teal-800">
-                <Sparkles size={14} /> Founder workspace
-              </div>
-              <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
-                Welcome back, {user?.name || "Founder"} <span aria-hidden="true">👋</span>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#c5d8ea]">Your workspace</p>
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                Welcome back, {user?.name || "Founder"}
               </h1>
-              <p className="mt-3 max-w-xl text-base leading-7 text-slate-600">
-                Your startup ideas, insights and analysis reports — all in one place.
+              <p className="mt-3 max-w-xl text-sm leading-6 text-[#d9e2ec] sm:text-base">
+                Pick up where you left off or start researching a new idea.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => navigate("/dashboard/competitors")}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-teal-200 bg-white px-5 py-3.5 text-sm font-bold text-teal-700 transition hover:-translate-y-0.5 hover:bg-teal-50"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 <FileSearch size={18} /> Find Competitors
               </button>
               <button
                 onClick={() => navigate("/")}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-teal-600/20 transition hover:-translate-y-0.5 hover:bg-teal-700"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#c5d8ea] px-5 py-3 text-sm font-semibold text-[#213247] transition hover:bg-white"
               >
                 <Plus size={18} /> Analyze New Startup
               </button>
@@ -208,7 +221,7 @@ export default function Dashboard() {
         </section>
 
         {/* Overview cards */}
-        <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <SummaryCard
             icon={BarChart3}
             label="Total analyses"
@@ -221,30 +234,30 @@ export default function Dashboard() {
             label="Latest startup"
             value={latestAnalysis?.startup_name || "No analyses yet"}
             detail={latestAnalysis?.industry || "Your next idea starts here"}
-            tint="blue"
+            tint="amber"
           />
           <SummaryCard
             icon={Target}
             label="Latest score"
             value={latestAnalysis?.startup_score ?? "--"}
             detail={latestAnalysis ? "Out of 100 points" : "No score available yet"}
-            tint="violet"
+            tint="slate"
           />
         </section>
 
         {/* Latest analysis spotlight */}
         {latestAnalysis && (
-          <section className="mt-8 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-sm">
+          <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="flex flex-col justify-between gap-6 border-b border-slate-100 p-6 sm:flex-row sm:items-center sm:p-8">
               <div>
-                <div className="inline-flex items-center gap-2 text-sm font-bold text-teal-700">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#345f8a]">
                   <Sparkles size={16} /> Latest analysis
                 </div>
-                <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                   {latestAnalysis.startup_name}
                 </h2>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-                  <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-600">
+                  <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
                     {latestAnalysis.industry || "Industry not specified"}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
@@ -253,40 +266,40 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 rounded-2xl bg-teal-50 px-5 py-4">
+              <div className="flex items-center gap-4 rounded-xl bg-[#edf3f9] px-5 py-4">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-teal-800">Startup score</p>
-                  <p className="mt-1 text-4xl font-extrabold leading-none text-teal-700">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#345f8a]">Startup score</p>
+                  <p className="mt-1 text-4xl font-semibold leading-none text-[#345f8a]">
                     {latestAnalysis.startup_score ?? "--"}
                     <span className="ml-1 text-sm font-semibold text-slate-500">/100</span>
                   </p>
                 </div>
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-teal-700 shadow-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-[#345f8a]">
                   <ChartNoAxesCombined size={22} />
                 </div>
               </div>
             </div>
 
-            <div className="grid gap-4 bg-slate-50/70 p-6 sm:grid-cols-3 sm:p-8">
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="grid gap-3 bg-[#f8f9f7] p-5 sm:grid-cols-3 sm:p-6">
+              <div className="rounded-xl border border-slate-200 bg-white p-5">
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
-                  <ChartNoAxesCombined size={17} className="text-emerald-600" /> Market potential
+                  <ChartNoAxesCombined size={17} className="text-[#345f8a]" /> Market potential
                 </div>
                 <p className="mt-3 text-sm leading-6 text-slate-800">
                   {latestAnalysis.market_potential || "Not available"}
                 </p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="rounded-xl border border-slate-200 bg-white p-5">
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
-                  <Target size={17} className="text-amber-600" /> Competition
+                  <Target size={17} className="text-[#a36c24]" /> Competition
                 </div>
                 <p className="mt-3 text-sm leading-6 text-slate-800">
                   {latestAnalysis.competition || "Not available"}
                 </p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="rounded-xl border border-slate-200 bg-white p-5">
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
-                  <Wallet size={17} className="text-teal-700" /> Estimated cost
+                  <Wallet size={17} className="text-[#345f8a]" /> Estimated cost
                 </div>
                 <p className="mt-3 text-sm leading-6 text-slate-800">
                   {latestAnalysis.estimated_cost || "Not available"}
@@ -297,7 +310,7 @@ export default function Dashboard() {
             <div className="flex justify-end border-t border-slate-100 px-6 py-4 sm:px-8">
               <button
                 onClick={() => navigate(`/dashboard/analysis/${latestAnalysis.id}`)}
-                className="inline-flex items-center gap-2 text-sm font-bold text-teal-700 transition hover:text-teal-900"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-[#345f8a] transition hover:text-[#243e5b]"
               >
                 View full report <ArrowRight size={17} />
               </button>
@@ -309,8 +322,8 @@ export default function Dashboard() {
         {!loading && !error && analyses.length > 0 && (
           <section className="mt-10">
             <div className="mb-6">
-              <p className="text-sm font-bold uppercase tracking-[0.16em] text-teal-700">At a glance</p>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#345f8a]">At a glance</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 Your startup analytics
               </h2>
               <p className="mt-2 text-sm text-slate-500">
@@ -319,14 +332,14 @@ export default function Dashboard() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-3">
-              <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <article className="rounded-xl border border-slate-200 border-l-[3px] border-l-[#345f8a] bg-white p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold text-slate-500">Average startup score</p>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#edf3f9] text-[#345f8a]">
                     <ChartNoAxesCombined size={20} />
                   </span>
                 </div>
-                <p className="mt-4 text-4xl font-extrabold tracking-tight text-teal-700">
+                <p className="mt-4 text-4xl font-semibold tracking-tight text-[#345f8a]">
                   {averageScore ?? "--"}
                   <span className="ml-1 text-base font-semibold text-slate-400">/100</span>
                 </p>
@@ -335,7 +348,7 @@ export default function Dashboard() {
                 </p>
               </article>
 
-              <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <article className="rounded-xl border border-slate-200 border-l-[3px] border-l-[#66809a] bg-white p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold text-slate-500">Highest-scoring startup</p>
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
@@ -347,7 +360,7 @@ export default function Dashboard() {
                     <p className="mt-4 truncate text-xl font-extrabold text-slate-900">
                       {highestScoringStartup.startup_name || "Untitled startup"}
                     </p>
-                    <p className="mt-1 text-3xl font-extrabold text-emerald-700">
+                    <p className="mt-1 text-3xl font-semibold text-[#345f8a]">
                       {highestScoringStartup.startup_score}<span className="ml-1 text-sm font-semibold text-slate-400">/100</span>
                     </p>
                   </>
@@ -356,10 +369,10 @@ export default function Dashboard() {
                 )}
               </article>
 
-              <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <article className="rounded-xl border border-slate-200 border-l-[3px] border-l-[#c07b50] bg-white p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold text-slate-500">Industries explored</p>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#f7eee8] text-[#a6683e]">
                     <Lightbulb size={20} />
                   </span>
                 </div>
@@ -369,13 +382,13 @@ export default function Dashboard() {
             </div>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="mb-5 flex items-center justify-between">
                   <div>
                     <h3 className="font-bold text-slate-900">Score distribution</h3>
                     <p className="mt-1 text-xs text-slate-500">Reports grouped by score range</p>
                   </div>
-                  <BarChart3 className="text-teal-700" size={20} />
+                  <BarChart3 className="text-[#345f8a]" size={20} />
                 </div>
                 <div className="space-y-5">
                   {scoreDistribution.map((group) => {
@@ -400,13 +413,13 @@ export default function Dashboard() {
                 </div>
               </article>
 
-              <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="mb-5 flex items-center justify-between">
                   <div>
                     <h3 className="font-bold text-slate-900">Analyses by industry</h3>
                     <p className="mt-1 text-xs text-slate-500">Your most explored categories</p>
                   </div>
-                  <ChartNoAxesCombined className="text-teal-700" size={20} />
+                  <ChartNoAxesCombined className="text-[#345f8a]" size={20} />
                 </div>
                 {industryDistribution.length ? (
                   <div className="space-y-4">
@@ -418,7 +431,7 @@ export default function Dashboard() {
                         </div>
                         <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-500"
+                            className="h-full rounded-full bg-[#6688ad] transition-all duration-500"
                             style={{ width: `${(count / maxIndustryCount) * 100}%` }}
                           />
                         </div>
@@ -437,8 +450,8 @@ export default function Dashboard() {
         <section className="mt-10">
           <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.16em] text-teal-700">Your workspace</p>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#345f8a]">Your workspace</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
                 Analysis history
               </h2>
               <p className="mt-2 text-sm text-slate-500">
@@ -453,7 +466,7 @@ export default function Dashboard() {
           </div>
 
           {!loading && !error && analyses.length > 0 && (
-            <div className="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[minmax(0,1.5fr)_minmax(180px,0.8fr)_minmax(180px,0.8fr)]">
+            <div className="mb-5 grid gap-3 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-[minmax(0,1.5fr)_minmax(180px,0.8fr)_minmax(180px,0.8fr)]">
               <label className="relative block">
                 <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">Search reports</span>
                 <span className="pointer-events-none absolute bottom-3.5 left-3 text-slate-400">
@@ -464,7 +477,7 @@ export default function Dashboard() {
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search startup name or industry..."
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#6688ad] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
                 />
               </label>
 
@@ -473,7 +486,7 @@ export default function Dashboard() {
                 <select
                   value={industryFilter}
                   onChange={(event) => setIndustryFilter(event.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-[#6688ad] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
                 >
                   <option value="all">All industries</option>
                   {industries.map((industry) => (
@@ -487,7 +500,7 @@ export default function Dashboard() {
                 <select
                   value={sortOrder}
                   onChange={(event) => setSortOrder(event.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-[#6688ad] focus:bg-white focus:ring-4 focus:ring-blue-900/10"
                 >
                   <option value="newest">Newest first</option>
                   <option value="oldest">Oldest first</option>
@@ -500,7 +513,7 @@ export default function Dashboard() {
 
           {loading && (
             <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm">
-              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-teal-600" />
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#6688ad]" />
               <p className="mt-5 text-sm font-medium text-slate-500">Loading your analyses...</p>
             </div>
           )}
@@ -512,8 +525,8 @@ export default function Dashboard() {
           )}
 
           {!loading && !error && analyses.length === 0 && (
-            <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center shadow-sm">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-[#edf3f9] text-[#345f8a]">
                 <Rocket size={30} />
               </div>
               <h3 className="mt-5 text-xl font-extrabold text-slate-900">No startup analyses yet</h3>
@@ -522,7 +535,7 @@ export default function Dashboard() {
               </p>
               <button
                 onClick={() => navigate("/")}
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-teal-700"
+                className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#345f8a] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#243e5b]"
               >
                 <Plus size={17} /> Analyze your first startup
               </button>
@@ -538,7 +551,7 @@ export default function Dashboard() {
               <p className="mt-1 text-sm text-slate-500">Try a different search term or industry filter.</p>
               <button
                 onClick={() => { setSearchTerm(""); setIndustryFilter("all"); setSortOrder("newest"); }}
-                className="mt-4 text-sm font-bold text-teal-700 hover:text-teal-900"
+                className="mt-4 text-sm font-semibold text-[#345f8a] hover:text-[#243e5b]"
               >
                 Clear filters
               </button>
@@ -550,7 +563,7 @@ export default function Dashboard() {
               {filteredAnalyses.map((analysis) => (
                 <article
                   key={analysis.id}
-                  className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-200 hover:shadow-md sm:p-6"
+                  className="group rounded-xl border border-slate-200 bg-white p-5 transition hover:border-[#a9bfd4] hover:shadow-sm sm:p-6"
                 >
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
@@ -559,7 +572,7 @@ export default function Dashboard() {
                           {analysis.startup_name || "Untitled startup"}
                         </h3>
                         {analysis.id === latestAnalysis?.id && (
-                          <span className="rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-bold text-teal-700">
+                          <span className="rounded-md bg-[#edf3f9] px-2.5 py-1 text-[11px] font-semibold text-[#345f8a]">
                             Latest
                           </span>
                         )}
@@ -581,7 +594,7 @@ export default function Dashboard() {
                       </div>
                       <button
                         onClick={() => navigate(`/dashboard/analysis/${analysis.id}`)}
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-800"
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-[#a9bfd4] hover:bg-[#f2f6fa] hover:text-[#345f8a]"
                       >
                         View report <ArrowRight size={16} />
                       </button>
