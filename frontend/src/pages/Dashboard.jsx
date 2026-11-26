@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import API_BASE_URL from "../config/api";
 import {
   ArrowRight,
   ArrowLeft,
@@ -96,7 +97,7 @@ export default function Dashboard() {
           return;
         }
 
-        const response = await fetch("http://localhost:5000/api/analyze/history", {
+        const response = await fetch(`${API_BASE_URL}/api/analyze/history`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });

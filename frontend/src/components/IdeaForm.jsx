@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import API_BASE_URL from "../config/api";
 import jsPDF from "jspdf";
 import {
   ArrowRight,
@@ -72,7 +73,7 @@ export default function IdeaForm() {
       }
 
       const response = await axios.post(
-        "http://localhost:5000/api/analyze",
+        `${API_BASE_URL}/api/analyze`,
         form,
         {
           headers: {
