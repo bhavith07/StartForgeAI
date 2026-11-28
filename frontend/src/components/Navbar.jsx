@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Menu, X, Home, LayoutDashboard, Rocket, Search, LogOut,
+  Menu, X, Home, LayoutDashboard, Rocket, Search, LogOut, Globe2,
   UserCircle, Sparkles, ChevronRight
 } from "lucide-react";
 
@@ -105,7 +105,10 @@ export default function Navbar() {
                     <Rocket size={18} /> Analyze Startup <ChevronRight className="ml-auto" size={15} />
                   </button>
                   <button className={itemClass} onClick={() => go("/dashboard/competitors")}>
-                    <Search size={18} /> Competitor Intelligence <ChevronRight className="ml-auto" size={15} />
+                    <Search size={18} /> Local Competitors <ChevronRight className="ml-auto" size={15} />
+                  </button>
+                  <button className={itemClass} onClick={() => go("/dashboard/industry-competitors")}>
+                    <Globe2 size={18} /> Industry Competitors <ChevronRight className="ml-auto" size={15} />
                   </button>
                 </div>
               )}
