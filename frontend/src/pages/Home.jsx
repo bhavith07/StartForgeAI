@@ -1,20 +1,15 @@
-import { useAuth } from "../context/AuthContext";
-import WorkspaceLayout from "../components/WorkspaceLayout";
-import Dashboard from "./Dashboard";
-import Login from "./Login";
+import Hero from "../components/Hero";
+import Features from "../components/Features";
+import HowItWorks from "../components/HowItWorks";
+import IdeaForm from "../components/IdeaForm";
 
 export default function Home() {
-  const { isLoggedIn } = useAuth();
-
-  // The website opens on login for signed-out visitors.
-  // Once authenticated, the same entry route becomes the founder workspace.
-  if (!isLoggedIn) {
-    return <Login />;
-  }
-
   return (
-    <WorkspaceLayout>
-      <Dashboard />
-    </WorkspaceLayout>
+    <main className="min-h-screen bg-white text-slate-900">
+      <Hero />
+      <Features />
+      <HowItWorks />
+      <IdeaForm />
+    </main>
   );
 }

@@ -4,7 +4,6 @@ import { useAuth } from "../context/AuthContext";
 import API_BASE_URL from "../config/api";
 import {
   ArrowRight,
-  ArrowLeft,
   BarChart3,
   CalendarDays,
   ChartNoAxesCombined,
@@ -69,16 +68,6 @@ function SummaryCard({ icon: Icon, label, value, detail, tint = "teal" }) {
 export default function Dashboard() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
-  const hasPreviousPage = window.history.length > 1;
-
-  function goBack() {
-    if (hasPreviousPage) {
-      navigate(-1);
-      return;
-    }
-    navigate("/");
-  }
-
   const [analyses, setAnalyses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -182,38 +171,39 @@ export default function Dashboard() {
     });
 
   return (
-    <main className="min-h-screen bg-[#f3f5f8] px-5 pb-16 pt-28 text-slate-900 sm:px-8">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_#e7f5f2_0%,_#f4f7fb_38%,_#f4f6fa_100%)] px-4 pb-16 pt-7 text-slate-900 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1500px]">
         {/* Welcome header */}
-        <section className="overflow-hidden rounded-2xl bg-[#25384f] p-7 text-white shadow-sm sm:p-9">
-          <button
-            type="button"
-            onClick={goBack}
-            className="mb-5 inline-flex items-center gap-2 rounded-lg border border-white/25 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            <ArrowLeft size={16} /> Back
-          </button>
-          <div className="flex flex-col items-start justify-between gap-7 lg:flex-row lg:items-center">
+        <section className="relative isolate overflow-hidden rounded-[26px] bg-gradient-to-br from-[#142b43] via-[#1c4055] to-[#087f75] p-7 text-white shadow-[0_18px_55px_-28px_rgba(15,60,75,0.65)] sm:p-9 lg:p-10">
+          <div className="pointer-events-none absolute -right-16 -top-28 -z-10 h-80 w-80 rounded-full border border-white/10 bg-white/[0.04]" />
+          <div className="pointer-events-none absolute right-28 top-16 -z-10 h-44 w-44 rounded-full border border-white/10" />
+          <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
             <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#c5d8ea]">Your workspace</p>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-teal-100">
+                <Sparkles size={13} /> Founder workspace
+              </div>
+              <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-[2.7rem]">
                 Welcome back, {user?.name || "Founder"}
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-[#d9e2ec] sm:text-base">
-                Pick up where you left off or start researching a new idea.
+              <p className="mt-3 max-w-xl text-sm leading-6 text-slate-200 sm:text-base">
+                Your ideas, market research and startup decisions — organised in one place.
               </p>
+              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-teal-50/90">
+                <span className="inline-flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300" /> Workspace active</span>
+                <span className="inline-flex items-center gap-2"><Sparkles size={13} /> Turn research into action</span>
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => navigate("/dashboard/competitors")}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/15"
               >
                 <FileSearch size={18} /> Find Competitors
               </button>
               <button
-                onClick={() => navigate("/")}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#c5d8ea] px-5 py-3 text-sm font-semibold text-[#213247] transition hover:bg-white"
+                onClick={() => navigate("/dashboard/analyze")}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-bold text-[#17394b] shadow-lg shadow-slate-950/10 transition hover:-translate-y-0.5 hover:bg-teal-50"
               >
                 <Plus size={18} /> Analyze New Startup
               </button>
@@ -221,8 +211,22 @@ export default function Dashboard() {
           </div>
         </section>
 
+        {/* Quick access */}
+        <section className="mt-6 grid gap-4 md:grid-cols-2">
+          <button onClick={() => navigate("/dashboard/analyze")} className="group flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-lg">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-700"><Rocket size={23} /></span>
+            <span className="min-w-0 flex-1"><span className="block font-bold text-slate-900">Evaluate a new idea</span><span className="mt-1 block text-sm text-slate-500">Assess market potential, costs and risks</span></span>
+            <ArrowRight className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-teal-700" size={19} />
+          </button>
+          <button onClick={() => navigate("/dashboard/competitors")} className="group flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700"><FileSearch size={23} /></span>
+            <span className="min-w-0 flex-1"><span className="block font-bold text-slate-900">Explore competitors</span><span className="mt-1 block text-sm text-slate-500">Discover businesses around your target market</span></span>
+            <ArrowRight className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-blue-700" size={19} />
+          </button>
+        </section>
+
         {/* Overview cards */}
-        <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <SummaryCard
             icon={BarChart3}
             label="Total analyses"
@@ -321,7 +325,7 @@ export default function Dashboard() {
 
         {/* Analytics overview */}
         {!loading && !error && analyses.length > 0 && (
-          <section className="mt-10">
+          <section className="mt-12">
             <div className="mb-6">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#345f8a]">At a glance</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
@@ -448,7 +452,7 @@ export default function Dashboard() {
         )}
 
         {/* Analysis history */}
-        <section className="mt-10">
+        <section className="mt-12">
           <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#345f8a]">Your workspace</p>
@@ -535,8 +539,8 @@ export default function Dashboard() {
                 Your reports will appear here after you analyse your first startup idea.
               </p>
               <button
-                onClick={() => navigate("/")}
-                className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#345f8a] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#243e5b]"
+                onClick={() => navigate("/dashboard/analyze")}
+                className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#087f75] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#243e5b]"
               >
                 <Plus size={17} /> Analyze your first startup
               </button>
