@@ -43,6 +43,10 @@ const CATEGORY_TAGS = {
   bakery: [["shop", "bakery"]],
   furniture: [["shop", "furniture"]],
   coworking: [["office", "coworking"]],
+  "technology companies": [["office", "it"], ["office", "software"], ["office", "telecommunication"], ["office", "technology"], ["office", "computer"], ["name", "startup"]],
+  "tech companies": [["office", "it"], ["office", "software"], ["office", "telecommunication"], ["office", "technology"], ["office", "computer"], ["name", "startup"]],
+  "tech startups": [["office", "it"], ["office", "software"], ["office", "technology"], ["name", "startup"]],
+  startups: [["office", "it"], ["office", "software"], ["office", "technology"], ["name", "startup"]],
 };
 
 const CACHE_TTL_MS = 15 * 60 * 1000;

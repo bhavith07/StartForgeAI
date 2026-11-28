@@ -1226,13 +1226,13 @@ export default function CompetitorAnalysis() {
       <div className="mx-auto max-w-7xl">
         <section className="rounded-3xl border border-teal-100 bg-gradient-to-br from-white via-white to-teal-50 p-7 shadow-sm sm:p-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-teal-100 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-teal-800">
-            <MapPinned size={14} /> Local market research
+            <MapPinned size={14} /> Local technology market research
           </div>
           <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
-            Find local competitors
+            Find tech companies and startups nearby
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
-            Discover mapped businesses around your target location using OpenStreetMap community data.
+            Search mapped software, IT, technology and telecom offices near your target location. Startup listings appear only when tagged in OpenStreetMap.
           </p>
 
           <form
@@ -1241,12 +1241,12 @@ export default function CompetitorAnalysis() {
           >
             <label className="block">
               <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
-                Business category
+                Technology category
               </span>
               <input
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
-                placeholder="e.g. restaurant, college, pharmacy"
+                placeholder="e.g. technology companies, tech startups, software company"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
                 maxLength={80}
                 required
