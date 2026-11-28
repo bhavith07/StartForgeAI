@@ -227,6 +227,11 @@ function BusinessCard({ business, index, displayNumber, isSelected, onSelect }) 
             <p className="mt-1 text-xs capitalize text-teal-700">
               {categoryLabel(business.category)}
             </p>
+            {business.description && (
+              <p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-600">
+                {business.description}
+              </p>
+            )}
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
               Map marker #{displayNumber}
             </p>
@@ -240,7 +245,7 @@ function BusinessCard({ business, index, displayNumber, isSelected, onSelect }) 
             onClick={(event) => event.stopPropagation()}
             className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-900"
           >
-            OSM <ExternalLink size={13} />
+            {business.source || "Source"} <ExternalLink size={13} />
           </a>
         )}
       </div>
@@ -248,7 +253,7 @@ function BusinessCard({ business, index, displayNumber, isSelected, onSelect }) 
       <div className="mt-4 space-y-2 text-sm text-slate-600">
         <p className="flex items-start gap-2">
           <MapPin size={15} className="mt-0.5 shrink-0 text-slate-400" />
-          <span>{business.address || "Address not listed in OpenStreetMap"}</span>
+          <span>{business.address || "Address not listed by source"}</span>
         </p>
         {business.distanceMeters != null && (
           <p className="flex items-center gap-2">
@@ -641,7 +646,7 @@ function drawCompetitorDistributionPlot(doc, businesses, location, radiusMeters,
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(51, 65, 85);
-  doc.text(`Mapped businesses (${plotted})`, legendX + 4, legendY + 1);
+  doc.text(`Company and place records (${plotted})`, legendX + 4, legendY + 1);
   legendY += 10;
   doc.setFillColor(250, 204, 21);
   doc.setDrawColor(146, 64, 14);
@@ -788,17 +793,17 @@ function buildCompetitorResearchPdf({
   // PAGE(S): Competitor comparison table.
   doc.addPage("a4", "landscape");
   let tableY = addPdfPageHeader(doc, "Competitor comparison table");
-  tableY = addPdfParagraph(doc, `The table follows the currently selected category filter and sort order. ${visibleResults.length} mapped records are included.`, margin, tableY, contentWidth, { fontSize: 8 });
+  tableY = addPdfParagraph(doc, `The table follows the currently selected category filter and sort order. ${visibleResults.length} records are included. Sources may have incomplete coverage.`, margin, tableY, contentWidth, { fontSize: 8 });
 
   const columns = [
     { title: "#", width: 9, value: (_b, index) => String(index + 1) },
-    { title: "Business", width: 38, value: (b) => `${b.name || "Unnamed mapped business"}\nOSM: ${b.osmId || "ID unavailable"}` },
+    { title: "Company / place", width: 38, value: (b) => `${b.name || "Unnamed record"}\n${b.source || "Source"}: ${b.osmId || b.wikidataId || "ID unavailable"}` },
     { title: "Category", width: 25, value: (b) => categoryLabel(b.category) },
     { title: "Distance", width: 22, value: (b) => b.distanceMeters != null ? distanceLabel(b.distanceMeters) : "Not available" },
-    { title: "Address", width: 51, value: (b) => b.address || "Not listed in OpenStreetMap" },
+    { title: "Address", width: 51, value: (b) => b.address || "Not listed by source" },
     { title: "Phone / website", width: 48, value: (b) => `Phone: ${b.phone || "not listed"}\nWeb: ${b.website || "not listed"}` },
     { title: "Opening hours", width: 42, value: (b) => b.openingHours || "Not listed" },
-    { title: "OSM source", width: 38, value: (b) => b.osmId ? `openstreetmap.org/${b.osmId}` : "Not available" },
+    { title: "Source", width: 38, value: (b) => b.sourceUrl || "Not available" },
   ];
   const tableWidth = columns.reduce((sum, column) => sum + column.width, 0);
   const tableX = (pageWidth - tableWidth) / 2;
@@ -1232,7 +1237,7 @@ export default function CompetitorAnalysis() {
             Find tech companies and startups nearby
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
-            Search mapped software, IT, technology and telecom offices near your target location. Startup listings appear only when tagged in OpenStreetMap.
+            Search nearby mapped tech offices and check Wikidata for known technology companies and startups with location records. Neither source is a complete startup directory.
           </p>
 
           <form
@@ -1322,7 +1327,7 @@ export default function CompetitorAnalysis() {
               <div>
                 <p className="text-sm font-bold uppercase tracking-wider text-teal-700">Search results</p>
                 <h2 className="mt-2 text-2xl font-extrabold text-slate-950">
-                  {results.length} mapped businesses found
+                  {results.length} companies and places found
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
                   {searchedLocation.name} · Within {searchedRadius >= 1000 ? `${searchedRadius / 1000} km` : `${searchedRadius} m`} · {searchedCategory}
@@ -1381,11 +1386,11 @@ export default function CompetitorAnalysis() {
             <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-slate-500">Mapped businesses</p>
+                  <p className="text-sm font-semibold text-slate-500">Companies and places found</p>
                   <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-700"><Store size={18} /></span>
                 </div>
                 <p className="mt-3 text-3xl font-extrabold text-slate-900">{results.length}</p>
-                <p className="mt-1 text-xs text-slate-500">Records returned by OpenStreetMap</p>
+                <p className="mt-1 text-xs text-slate-500">Combined records from the selected sources</p>
               </article>
               <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex items-center justify-between gap-3">
@@ -1405,7 +1410,7 @@ export default function CompetitorAnalysis() {
               </article>
             </section>
             <p className="mt-3 text-xs leading-5 text-slate-500">
-              Density is an estimate based on the mapped results returned for this search, not a complete count of every business in the area. OpenStreetMap coverage varies by location.
+              Density is an estimate based on records returned for this search, not a complete company count. OpenStreetMap and Wikidata coverage varies by location.
             </p>
 
             <section className="mt-8 overflow-hidden rounded-3xl border border-teal-100 bg-white shadow-sm">
@@ -1414,9 +1419,9 @@ export default function CompetitorAnalysis() {
                   <div className="inline-flex items-center gap-2 text-sm font-bold text-teal-700">
                     <Sparkles size={17} /> Gemini-powered competitor comparison
                   </div>
-                  <h3 className="mt-2 text-xl font-extrabold text-slate-950">Turn mapped businesses into market insights</h3>
+                  <h3 className="mt-2 text-xl font-extrabold text-slate-950">Turn company records into market insights</h3>
                   <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
-                    Gemini will review the saved OpenStreetMap records, identify patterns and suggest opportunities to investigate.
+                    Gemini will review the saved records, identify patterns and suggest opportunities to investigate.
                   </p>
                   <p className="mt-2 text-xs text-slate-500">
                     {selectedStartupAnalysis
@@ -1469,7 +1474,7 @@ export default function CompetitorAnalysis() {
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                       <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Records considered</p>
                       <p className="mt-2 text-2xl font-extrabold text-slate-900">{insights.businessRecordsConsidered ?? 0}<span className="ml-1 text-sm font-semibold text-slate-400">/ {insights.totalMappedRecords ?? results.length}</span></p>
-                      <p className="mt-1 text-xs text-slate-500">Detailed mapped records supplied to Gemini</p>
+                      <p className="mt-1 text-xs text-slate-500">Detailed records supplied to Gemini</p>
                     </div>
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                       <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Analysis type</p>
@@ -1560,7 +1565,7 @@ export default function CompetitorAnalysis() {
               </div>
 
               <div className="mb-3 flex items-center justify-between gap-3 text-xs text-slate-500">
-                <span>Showing {visibleResults.length} of {results.length} mapped businesses in the table and cards</span>
+                <span>Showing {visibleResults.length} of {results.length} company and place records in the table and cards</span>
                 {activeBusinessId && (
                   <button type="button" onClick={() => setActiveBusinessId(null)} className="font-semibold text-teal-700 hover:text-teal-900">Clear map selection</button>
                 )}
@@ -1572,11 +1577,11 @@ export default function CompetitorAnalysis() {
                     <div>
                       <h4 className="text-base font-extrabold text-slate-900">Competitor comparison table</h4>
                       <p className="mt-1 text-xs text-slate-500">
-                        Compare the mapped business details side by side. The row numbers match the map markers and cards.
+                        Compare company and place details side by side. The row numbers match the map markers and cards.
                       </p>
                     </div>
                     <span className="inline-flex w-fit items-center rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-800">
-                      {visibleResults.length} businesses
+                      {visibleResults.length} records
                     </span>
                   </div>
 
@@ -1585,7 +1590,7 @@ export default function CompetitorAnalysis() {
                       <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
                         <tr>
                           <th scope="col" className="w-16 px-4 py-3 font-bold">#</th>
-                          <th scope="col" className="min-w-48 px-4 py-3 font-bold">Business</th>
+                          <th scope="col" className="min-w-48 px-4 py-3 font-bold">Company / place</th>
                           <th scope="col" className="min-w-32 px-4 py-3 font-bold">Category</th>
                           <th scope="col" className="min-w-28 px-4 py-3 font-bold">Distance</th>
                           <th scope="col" className="min-w-52 px-4 py-3 font-bold">Address</th>
@@ -1614,15 +1619,16 @@ export default function CompetitorAnalysis() {
                                 </span>
                               </td>
                               <td className="px-4 py-3 align-top">
-                                <p className="font-bold text-slate-900">{business.name || "Unnamed mapped business"}</p>
-                                <p className="mt-1 text-[11px] text-slate-400">OSM record: {business.osmId || "ID unavailable"}</p>
+                                <p className="font-bold text-slate-900">{business.name || "Unnamed record"}</p>
+                                <p className="mt-1 text-[11px] text-slate-400">{business.source || "Source"} record: {business.osmId || business.wikidataId || "ID unavailable"}</p>
+                                {business.description && <p className="mt-1 max-w-64 text-xs leading-5 text-slate-600">{business.description}</p>}
                               </td>
                               <td className="px-4 py-3 align-top text-slate-700">{categoryLabel(business.category)}</td>
                               <td className="px-4 py-3 align-top whitespace-nowrap text-slate-700">
                                 {business.distanceMeters != null ? distanceLabel(business.distanceMeters) : "Not available"}
                               </td>
                               <td className="px-4 py-3 align-top text-slate-600">
-                                <span className="block max-w-64 whitespace-normal">{business.address || "Not listed in OpenStreetMap"}</span>
+                                <span className="block max-w-64 whitespace-normal">{business.address || "Address not listed by source"}</span>
                               </td>
                               <td className="px-4 py-3 align-top">
                                 <div className="flex max-w-52 flex-col gap-1.5">
@@ -1656,7 +1662,7 @@ export default function CompetitorAnalysis() {
                                   </button>
                                   {sourceUrl && (
                                     <a href={sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-teal-700">
-                                      Open OSM <ExternalLink size={11} />
+                                      Open source <ExternalLink size={11} />
                                     </a>
                                   )}
                                 </div>
@@ -1669,7 +1675,7 @@ export default function CompetitorAnalysis() {
                   </div>
 
                   <div className="border-t border-slate-100 bg-slate-50/70 px-5 py-3 text-[11px] leading-5 text-slate-500">
-                    Information is shown only when it is available in OpenStreetMap. Missing phone numbers, websites and opening hours are not inferred. Ratings and customer reviews are not provided by this data source.
+                    Company details appear only when published by the listed source. Missing contact details are not inferred. Verify company status and location before relying on a result.
                   </div>
                 </section>
               )}

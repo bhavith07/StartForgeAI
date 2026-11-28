@@ -2,6 +2,7 @@ import express from "express";
 import { authenticateToken } from "../middleware/authMiddleware.js";
 import { geocodeLocation } from "../services/geocodingService.js";
 import { searchOverpass } from "../services/overpassService.js";
+import { isTechnologyCompetitorCategory, searchWikidataTechCompanies } from "../services/wikidataCompetitorService.js";
 import {
   createCompetitorSearch,
   getUserCompetitorSearches,
@@ -107,6 +108,40 @@ router.post("/search", authenticateToken, async (req, res) => {
       category: cleanCategory,
     });
 
+    let knowledgeBaseResults = [];
+    let wikidataError = null;
+    if (isTechnologyCompetitorCategory(cleanCategory)) {
+      try {
+        const wikidata = await searchWikidataTechCompanies({
+          latitude: point.latitude,
+          longitude: point.longitude,
+          radiusMeters: radius,
+          category: cleanCategory,
+        });
+        knowledgeBaseResults = wikidata.results;
+      } catch (error) {
+        wikidataError = error.message;
+        console.warn("Wikidata nearby company search failed:", error.message);
+      }
+    }
+
+    const seenCompanies = new Set();
+    const combinedResults = [...found.results, ...knowledgeBaseResults].filter((company) => {
+      const key = String(company.name || "").trim().toLowerCase();
+      if (!key || seenCompanies.has(key)) return false;
+      seenCompanies.add(key);
+      return true;
+    }).sort((a, b) => (a.distanceMeters ?? Number.MAX_SAFE_INTEGER) - (b.distanceMeters ?? Number.MAX_SAFE_INTEGER));
+    const wikidataWasQueried = isTechnologyCompetitorCategory(cleanCategory);
+    const combinedProvider = wikidataWasQueried
+      ? "OpenStreetMap via Overpass + Wikidata"
+      : found.provider;
+    const combinedNotice = wikidataWasQueried
+      ? wikidataError
+        ? `OpenStreetMap results are shown. Wikidata could not be reached (${wikidataError}); try again later. Both sources have incomplete coverage, so this is not a complete startup directory.`
+        : "Results combine mapped OpenStreetMap offices with technology companies and startups recorded in Wikidata. Both sources have incomplete coverage; this is not a complete startup directory."
+      : found.dataNotice;
+
     const saved = await createCompetitorSearch({
       userId,
       analysisId: linkedAnalysis?.id ?? null,
@@ -115,8 +150,8 @@ router.post("/search", authenticateToken, async (req, res) => {
       longitude: point.longitude,
       radiusMeters: radius,
       category: cleanCategory,
-      results: found.results,
-      provider: "openstreetmap",
+      results: combinedResults,
+      provider: wikidataWasQueried ? "openstreetmap+wikidata" : "openstreetmap",
     });
 
     return res.status(200).json({
@@ -130,7 +165,12 @@ router.post("/search", authenticateToken, async (req, res) => {
       category: cleanCategory,
       radiusMeters: radius,
       ...found,
-      note: "OpenStreetMap coverage varies by area. Results are mapped businesses, not a complete list of all competitors. Ratings and customer reviews are not provided in this phase.",
+      results: combinedResults,
+      returnedCount: combinedResults.length,
+      provider: combinedProvider,
+      note: combinedNotice,
+      wikidataQueried: wikidataWasQueried,
+      wikidataError,
     });
   } catch (error) {
     console.error("Competitor search error:", error);
