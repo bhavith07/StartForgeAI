@@ -52,12 +52,10 @@ function buildQuery(latitude, longitude, radiusMeters) {
   return `
 SELECT ?company ?companyLabel ?description ?coordinates ?distance (SAMPLE(?website) AS ?website) WHERE {
   SERVICE wikibase:around {
-    { ?company wdt:P625 ?coordinates . }
-    UNION
-    { ?company wdt:P159/wdt:P625 ?coordinates . }
-    bd:serviceParam wikibase:around.center "Point(${longitude} ${latitude})"^^geo:wktLiteral ;
-      wikibase:around.radius "${radiusKm}" ;
-      wikibase:around.distance ?distance .
+    ?company wdt:P625 ?coordinates .
+    bd:serviceParam wikibase:center "Point(${longitude} ${latitude})"^^geo:wktLiteral ;
+      wikibase:radius "${radiusKm}" ;
+      wikibase:distance ?distance .
   }
   VALUES ?type { wd:Q18388277 wd:Q1058914 wd:Q129238 }
   ?company wdt:P31/wdt:P279* ?type .
