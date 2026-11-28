@@ -548,16 +548,22 @@ export default function IdeaForm() {
 
                 <div className="sm:col-span-2">
                   <label htmlFor="model" className="flex items-center gap-2 text-sm font-bold text-slate-800">
-                    <Wallet size={16} className="text-teal-700" /> Business model
+                    <Wallet size={16} className="text-teal-700" /> Technology revenue model
                   </label>
                   <select id="model" name="model" value={form.model} onChange={handleChange} required className={selectClass}>
-                    <option value="">Select business model</option>
-                    <option value="SaaS">Software people pay to use (SaaS)</option>
-                    <option value="Subscription">Monthly or yearly payments</option>
-                    <option value="Marketplace">Connect buyers and sellers</option>
-                    <option value="Freemium">Free basics, paid extras (freemium)</option>
+                    <option value="">Select a technology revenue model</option>
+                    <option value="SaaS subscription">SaaS subscription (per user or tiered plans)</option>
+                    <option value="Usage-based and API pricing">Usage-based or API pricing</option>
+                    <option value="Freemium software">Freemium software (free tier with paid features)</option>
+                    <option value="Software licensing">Software licensing (perpetual or per seat)</option>
+                    <option value="Enterprise software contracts">Enterprise license or annual contract</option>
+                    <option value="Marketplace transaction fees">Marketplace transaction fees</option>
+                    <option value="Open-source commercial model">Open-source core with paid hosted or enterprise features</option>
+                    <option value="Advertising and sponsored placements">Advertising or sponsored placements</option>
+                    <option value="Hardware and software subscription">Hardware bundled with a software subscription</option>
+                    <option value="Software plus implementation services">Software subscription plus setup or support services</option>
                   </select>
-                  <p className="mt-2 text-xs leading-5 text-slate-500">How will the business earn money?</p>
+                  <p className="mt-2 text-xs leading-5 text-slate-500">Choose how the technology product will earn revenue.</p>
                 </div>
               </div>
             </div>
