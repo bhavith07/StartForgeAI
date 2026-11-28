@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import API_BASE_URL from "../config/api";
@@ -16,6 +17,7 @@ export default function Register() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -24,6 +26,8 @@ export default function Register() {
       ...previous,
       [name]: name === "username" ? value.replace(/\s/g, "") : value,
     }));
+
+    if (error) setError("");
   }
 
   function validateForm() {
@@ -222,19 +226,37 @@ export default function Register() {
             <label className="mb-2 block text-slate-700" htmlFor="password">
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="Minimum 8 characters"
-              autoComplete="new-password"
-              minLength={8}
-              maxLength={72}
-              required
-              className={inputClass}
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Minimum 8 characters"
+                autoComplete="new-password"
+                minLength={8}
+                maxLength={72}
+                required
+                className={`${inputClass} pr-12`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+                className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-500 transition hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500"
+              >
+                {showPassword ? (
+                  <EyeOff size={20} aria-hidden="true" />
+                ) : (
+                  <Eye size={20} aria-hidden="true" />
+                )}
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">
+              Use at least 8 characters.
+            </p>
           </div>
 
           <button
