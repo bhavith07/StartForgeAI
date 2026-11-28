@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AnalysisDetails from "./pages/AnalysisDetails";
 import CompetitorAnalysis from "./pages/CompetitorAnalysis";
+import IndustryCompetitors from "./pages/IndustryCompetitors";
 import StartupAnalysis from "./pages/StartupAnalysis";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -29,6 +30,7 @@ export default function App() {
       <Route path="/dashboard/analyze" element={<WorkspacePage><StartupAnalysis /></WorkspacePage>} />
       <Route path="/dashboard/analysis/:id" element={<WorkspacePage><AnalysisDetails /></WorkspacePage>} />
       <Route path="/dashboard/competitors" element={<WorkspacePage><CompetitorAnalysis /></WorkspacePage>} />
+      <Route path="/dashboard/industry-competitors" element={<WorkspacePage><IndustryCompetitors /></WorkspacePage>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

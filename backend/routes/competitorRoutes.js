@@ -10,9 +10,40 @@ import {
 } from "../models/CompetitorSearch.js";
 import { getAnalysisById } from "../models/StartupAnalysis.js";
 import { generateCompetitorInsights } from "../services/competitorInsightService.js";
+import { researchIndustryCompetitors } from "../services/industryCompetitorResearchService.js";
+import { saveIndustryCompetitorResearch } from "../models/IndustryCompetitorResearch.js";
 
 const router = express.Router();
 const ALLOWED_RADII = [500, 1000, 2000, 3000, 5000, 10000];
+
+
+router.post("/industry-search", authenticateToken, async (req, res) => {
+  try {
+    const idea = String(req.body?.idea || "").trim();
+    const industry = String(req.body?.industry || "").trim();
+    const targetMarket = String(req.body?.targetMarket || "Global").trim() || "Global";
+    if (idea.length < 12 || idea.length > 1200) {
+      return res.status(400).json({ success: false, message: "Describe your startup idea in 12–1,200 characters." });
+    }
+    if (industry.length < 2 || industry.length > 120) {
+      return res.status(400).json({ success: false, message: "Enter an industry between 2 and 120 characters." });
+    }
+    if (targetMarket.length > 180) {
+      return res.status(400).json({ success: false, message: "Target market must be 180 characters or fewer." });
+    }
+    const research = await researchIndustryCompetitors({ idea, industry, targetMarket });
+    const saved = await saveIndustryCompetitorResearch({
+      userId: Number(req.user.userId), idea, industry, targetMarket, research,
+    });
+    return res.status(200).json({ success: true, researchId: saved.id, research, createdAt: saved.created_at });
+  } catch (error) {
+    console.error("Industry competitor research error:", error);
+    return res.status(error.status || 502).json({
+      success: false,
+      message: error.message || "Unable to research industry competitors right now.",
+    });
+  }
+});
 
 router.post("/search", authenticateToken, async (req, res) => {
   try {
