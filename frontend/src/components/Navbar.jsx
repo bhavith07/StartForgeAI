@@ -19,8 +19,8 @@ export default function Navbar() {
 
   function goToSection(section) {
     setMenuOpen(false);
-    if (location.pathname !== "/") {
-      navigate("/#" + section);
+    if (location.pathname !== "/home") {
+      navigate("/home#" + section);
       return;
     }
     document.getElementById(section)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -33,6 +33,7 @@ export default function Navbar() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  const homePath = isLoggedIn ? "/home" : "/";
   const itemClass = "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-teal-50 hover:text-teal-800";
 
   return (
@@ -49,7 +50,7 @@ export default function Navbar() {
             {menuOpen ? <X size={21} /> : <Menu size={21} />}
           </button>
 
-          <button onClick={() => go("/")} className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
+          <button onClick={() => go(homePath)} className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 text-white">🚀</span>
             <span>StartForge <span className="text-teal-600">AI</span></span>
           </button>
@@ -87,7 +88,7 @@ export default function Navbar() {
             <nav className="flex-1 space-y-5 overflow-y-auto">
               <div>
                 <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Main</p>
-                <button className={itemClass} onClick={() => go("/")}>
+                <button className={itemClass} onClick={() => go(homePath)}>
                   <Home size={18} /> Home <ChevronRight className="ml-auto" size={15} />
                 </button>
                 {isLoggedIn && (
@@ -97,15 +98,17 @@ export default function Navbar() {
                 )}
               </div>
 
-              <div>
-                <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Startup tools</p>
-                <button className={itemClass} onClick={() => go("/dashboard/analyze")}>
-                  <Rocket size={18} /> Analyze Startup <ChevronRight className="ml-auto" size={15} />
-                </button>
-                <button className={itemClass} onClick={() => go(isLoggedIn ? "/dashboard/competitors" : "/login")}>
-                  <Search size={18} /> Competitor Intelligence <ChevronRight className="ml-auto" size={15} />
-                </button>
-              </div>
+              {isLoggedIn && (
+                <div>
+                  <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Startup tools</p>
+                  <button className={itemClass} onClick={() => go("/dashboard/analyze")}>
+                    <Rocket size={18} /> Analyze Startup <ChevronRight className="ml-auto" size={15} />
+                  </button>
+                  <button className={itemClass} onClick={() => go("/dashboard/competitors")}>
+                    <Search size={18} /> Competitor Intelligence <ChevronRight className="ml-auto" size={15} />
+                  </button>
+                </div>
+              )}
 
               {!isLoggedIn && (
                 <div>
