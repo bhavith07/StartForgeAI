@@ -13,6 +13,7 @@ import {
   FileText,
   Lightbulb,
   LoaderCircle,
+  MapPin,
   Rocket,
   Sparkles,
   Target,
