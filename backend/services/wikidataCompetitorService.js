@@ -86,13 +86,22 @@ export async function searchWikidataTechCompanies({ latitude, longitude, radiusM
   url.searchParams.set("query", query);
   url.searchParams.set("format", "json");
 
-  const response = await fetch(url, {
+  const requestOptions = {
     headers: {
       Accept: "application/sparql-results+json",
       "User-Agent": process.env.WIKIDATA_USER_AGENT || "StartForgeAI/1.0 (nearby technology company search)",
     },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-  });
+  };
+
+  // WDQS occasionally returns a transient gateway error. Retry once so a
+  // brief upstream hiccup does not immediately turn an otherwise valid search
+  // into an empty result set.
+  let response = await fetch(url, requestOptions);
+  if ([502, 503, 504].includes(response.status)) {
+    await new Promise((resolve) => setTimeout(resolve, 900));
+    response = await fetch(url, requestOptions);
+  }
 
   if (!response.ok) {
     throw new Error(`Wikidata search returned HTTP ${response.status}.`);

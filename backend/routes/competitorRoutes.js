@@ -138,7 +138,7 @@ router.post("/search", authenticateToken, async (req, res) => {
       : found.provider;
     const combinedNotice = wikidataWasQueried
       ? wikidataError
-        ? `OpenStreetMap results are shown. Wikidata could not be reached (${wikidataError}); try again later. Both sources have incomplete coverage, so this is not a complete startup directory.`
+        ? `${combinedResults.length ? "OpenStreetMap matches are shown" : "No matching tech companies were found in the mapped OpenStreetMap records"}. Wikidata could not be reached (${wikidataError}); retry later. OpenStreetMap only includes places tagged by contributors, so zero results does not mean there are no tech companies nearby.`
         : "Results combine mapped OpenStreetMap offices with technology companies and startups recorded in Wikidata. Both sources have incomplete coverage; this is not a complete startup directory."
       : found.dataNotice;
 

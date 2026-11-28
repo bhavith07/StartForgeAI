@@ -1237,7 +1237,7 @@ export default function CompetitorAnalysis() {
             Find tech companies and startups nearby
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
-            Search nearby mapped tech offices and check Wikidata for known technology companies and startups with location records. Neither source is a complete startup directory.
+            Search mapped IT, software, telecom and startup locations nearby, then check Wikidata for known companies with coordinates. Results depend on what each free source has recorded; neither is a complete startup directory.
           </p>
 
           <form
