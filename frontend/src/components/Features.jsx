@@ -17,7 +17,8 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" className="scroll-mt-24 bg-white px-5 py-20 sm:px-8 sm:py-24">
+    <section id="features" className="relative isolate scroll-mt-24 overflow-hidden bg-[#fbfdfd] px-5 py-20 sm:px-8 sm:py-24">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_12%_25%,rgba(45,212,191,0.12),transparent_30%),radial-gradient(ellipse_at_88%_75%,rgba(167,139,250,0.12),transparent_32%)]" />
       <div className="mx-auto max-w-[1320px]">
         <div className="mb-12 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
           <div className="max-w-2xl">
