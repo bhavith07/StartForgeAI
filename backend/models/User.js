@@ -5,12 +5,28 @@ export async function findUserByEmail(email) {
 
   const result = await db.query(
     `
-    SELECT id, name, email, password, created_at
+    SELECT id, name, email, username, password, created_at
     FROM users
-    WHERE email = $1
+    WHERE LOWER(email) = LOWER($1)
     LIMIT 1
     `,
-    [email.toLowerCase().trim()]
+    [email.trim()]
+  );
+
+  return result.rows[0] || null;
+}
+
+export async function findUserByUsername(username) {
+  const db = getDB();
+
+  const result = await db.query(
+    `
+    SELECT id, name, email, username
+    FROM users
+    WHERE LOWER(username) = LOWER($1)
+    LIMIT 1
+    `,
+    [username.trim()]
   );
 
   return result.rows[0] || null;
@@ -21,13 +37,14 @@ export async function createUser(user) {
 
   const result = await db.query(
     `
-    INSERT INTO users (name, email, password, created_at)
-    VALUES ($1, $2, $3, $4)
-    RETURNING id, name, email, password, created_at
+    INSERT INTO users (name, email, username, password, created_at)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id, name, email, username, created_at
     `,
     [
       user.name,
       user.email,
+      user.username,
       user.password,
       user.createdAt || new Date(),
     ]
