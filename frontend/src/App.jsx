@@ -6,8 +6,14 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AnalysisDetails from "./pages/AnalysisDetails";
 import CompetitorAnalysis from "./pages/CompetitorAnalysis";
+import StartupAnalysis from "./pages/StartupAnalysis";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import WorkspaceLayout from "./components/WorkspaceLayout";
+
+function WorkspacePage({ children }) {
+  return <ProtectedRoute><WorkspaceLayout>{children}</WorkspaceLayout></ProtectedRoute>;
+}
 
 export default function App() {
   return (
@@ -16,20 +22,10 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      <Route
-        path="/dashboard"
-        element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
-      />
-
-      <Route
-        path="/dashboard/analysis/:id"
-        element={<ProtectedRoute><AnalysisDetails /></ProtectedRoute>}
-      />
-
-      <Route
-        path="/dashboard/competitors"
-        element={<ProtectedRoute><CompetitorAnalysis /></ProtectedRoute>}
-      />
+      <Route path="/dashboard" element={<WorkspacePage><Dashboard /></WorkspacePage>} />
+      <Route path="/dashboard/analyze" element={<WorkspacePage><StartupAnalysis /></WorkspacePage>} />
+      <Route path="/dashboard/analysis/:id" element={<WorkspacePage><AnalysisDetails /></WorkspacePage>} />
+      <Route path="/dashboard/competitors" element={<WorkspacePage><CompetitorAnalysis /></WorkspacePage>} />
     </Routes>
   );
 }

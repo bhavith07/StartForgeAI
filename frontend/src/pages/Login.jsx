@@ -49,7 +49,7 @@ export default function Login() {
       }
 
       login(data.user, data.token);
-      navigate("/dashboard");
+      navigate("/");
     } catch (error) {
       setError(error.message);
     } finally {
