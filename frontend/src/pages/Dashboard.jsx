@@ -171,7 +171,9 @@ export default function Dashboard() {
     });
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_#e7f5f2_0%,_#f4f7fb_38%,_#f4f6fa_100%)] px-4 pb-16 pt-7 text-slate-900 sm:px-6 lg:px-8">
+    <main className="relative min-h-screen overflow-hidden bg-[#f4f7fb] px-4 pb-16 pt-7 text-slate-900 sm:px-6 lg:px-8">
+      <div className="pointer-events-none fixed inset-0 -z-0 bg-[radial-gradient(ellipse_at_8%_12%,rgba(34,211,238,0.20),transparent_28%),radial-gradient(ellipse_at_92%_18%,rgba(168,85,247,0.16),transparent_30%),radial-gradient(ellipse_at_78%_78%,rgba(16,185,129,0.15),transparent_30%),radial-gradient(ellipse_at_20%_88%,rgba(59,130,246,0.12),transparent_28%)]" />
+      <div className="relative z-10">
       <div className="mx-auto max-w-[1500px]">
         {/* Welcome header */}
         <section className="relative isolate overflow-hidden rounded-[26px] bg-gradient-to-br from-[#142b43] via-[#1c4055] to-[#087f75] p-7 text-white shadow-[0_18px_55px_-28px_rgba(15,60,75,0.65)] sm:p-9 lg:p-10">
@@ -194,34 +196,20 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => navigate("/dashboard/competitors")}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/15"
-              >
-                <FileSearch size={18} /> Find Competitors
-              </button>
-              <button
-                onClick={() => navigate("/dashboard/analyze")}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3.5 text-sm font-bold text-[#17394b] shadow-lg shadow-slate-950/10 transition hover:-translate-y-0.5 hover:bg-teal-50"
-              >
-                <Plus size={18} /> Analyze New Startup
-              </button>
-            </div>
-          </div>
+
         </section>
 
         {/* Quick access */}
-        <section className="mt-6 grid gap-4 md:grid-cols-2">
-          <button onClick={() => navigate("/dashboard/analyze")} className="group flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-lg">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-700"><Rocket size={23} /></span>
-            <span className="min-w-0 flex-1"><span className="block font-bold text-slate-900">Evaluate a new idea</span><span className="mt-1 block text-sm text-slate-500">Assess market potential, costs and risks</span></span>
-            <ArrowRight className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-teal-700" size={19} />
+        <section className="mt-7 grid gap-5 md:grid-cols-2">
+          <button onClick={() => navigate("/dashboard/analyze")} className="group relative isolate flex min-h-[126px] items-center gap-5 overflow-hidden rounded-2xl border border-teal-200/80 bg-gradient-to-br from-white via-teal-50 to-cyan-100/80 p-6 text-left shadow-[0_14px_35px_-22px_rgba(13,148,136,0.65)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_22px_42px_-20px_rgba(13,148,136,0.55)]">
+            <span className="pointer-events-none absolute -right-8 -top-10 -z-10 h-40 w-40 rounded-full bg-cyan-300/40 blur-2xl transition group-hover:bg-cyan-300/60" />
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-500 text-white shadow-lg shadow-teal-700/20"><Rocket size={26} /></span>
+            <span className="min-w-0 flex-1"><span className="block text-lg font-extrabold text-[#123b43]">Evaluate a new idea</span><span className="mt-1 block text-sm leading-5 text-slate-600">Assess market potential, costs and risks</span><span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-teal-800">Start assessment <ArrowRight size={14} className="transition group-hover:translate-x-1" /></span></span>
           </button>
-          <button onClick={() => navigate("/dashboard/competitors")} className="group flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700"><FileSearch size={23} /></span>
-            <span className="min-w-0 flex-1"><span className="block font-bold text-slate-900">Explore competitors</span><span className="mt-1 block text-sm text-slate-500">Discover businesses around your target market</span></span>
-            <ArrowRight className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-blue-700" size={19} />
+          <button onClick={() => navigate("/dashboard/competitors")} className="group relative isolate flex min-h-[126px] items-center gap-5 overflow-hidden rounded-2xl border border-blue-200/80 bg-gradient-to-br from-white via-blue-50 to-violet-100/80 p-6 text-left shadow-[0_14px_35px_-22px_rgba(79,70,229,0.55)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_22px_42px_-20px_rgba(79,70,229,0.45)]">
+            <span className="pointer-events-none absolute -right-8 -top-10 -z-10 h-40 w-40 rounded-full bg-violet-300/40 blur-2xl transition group-hover:bg-violet-300/60" />
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-violet-500 text-white shadow-lg shadow-blue-700/20"><FileSearch size={26} /></span>
+            <span className="min-w-0 flex-1"><span className="block text-lg font-extrabold text-[#1d3154]">Explore competitors</span><span className="mt-1 block text-sm leading-5 text-slate-600">Discover businesses around your target market</span><span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-blue-800">Open competitor research <ArrowRight size={14} className="transition group-hover:translate-x-1" /></span></span>
           </button>
         </section>
 
@@ -610,6 +598,7 @@ export default function Dashboard() {
             </div>
           )}
         </section>
+      </div>
       </div>
     </main>
   );
