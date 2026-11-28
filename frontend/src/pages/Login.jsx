@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import API_BASE_URL from "../config/api";
@@ -14,6 +15,7 @@ export default function Login() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleChange(e) {
     setForm({
@@ -47,7 +49,6 @@ export default function Login() {
       }
 
       login(data.user, data.token);
-
       navigate("/dashboard");
     } catch (error) {
       setError(error.message);
@@ -56,18 +57,20 @@ export default function Login() {
     }
   }
 
+  const inputClass =
+    "w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10";
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-teal-50 via-white to-cyan-50 px-6 py-12 text-slate-900">
       <div className="relative w-full max-w-md">
-
-        <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🚀</div>
+        <div className="mb-8 text-center">
+          <div className="mb-3 text-5xl">🚀</div>
 
           <h1 className="text-4xl font-bold text-teal-700">
             StartForge AI
           </h1>
 
-          <p className="text-slate-600 mt-2">
+          <p className="mt-2 text-slate-600">
             Login to your account
           </p>
         </div>
@@ -77,41 +80,70 @@ export default function Login() {
           className="space-y-5 rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/60 sm:p-10"
         >
           {error && (
-            <div className="bg-rose-50 border border-red-500 text-rose-700 rounded-lg p-3">
+            <div
+              role="alert"
+              className="rounded-lg border border-red-200 bg-rose-50 p-3 text-rose-700"
+            >
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-slate-700 mb-2">
+            <label
+              className="mb-2 block text-slate-700"
+              htmlFor="email"
+            >
               Email
             </label>
 
             <input
+              id="email"
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
               placeholder="Enter your email"
+              autoComplete="email"
               required
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+              className={inputClass}
             />
           </div>
 
           <div>
-            <label className="block text-slate-700 mb-2">
+            <label
+              className="mb-2 block text-slate-700"
+              htmlFor="password"
+            >
               Password
             </label>
 
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              required
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                required
+                className={`${inputClass} pr-12`}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+                className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-500 transition hover:text-teal-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500"
+              >
+                {showPassword ? (
+                  <EyeOff size={20} aria-hidden="true" />
+                ) : (
+                  <Eye size={20} aria-hidden="true" />
+                )}
+              </button>
+            </div>
           </div>
 
           <button
@@ -126,13 +158,12 @@ export default function Login() {
             Don't have an account?{" "}
             <Link
               to="/register"
-              className="text-teal-700 hover:text-teal-700"
+              className="text-teal-700 hover:text-teal-800"
             >
               Register
             </Link>
           </p>
         </form>
-
       </div>
     </div>
   );
