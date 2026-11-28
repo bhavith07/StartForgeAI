@@ -111,7 +111,7 @@ export async function analyzeStartup(data) {
   });
 
   const prompt = `
-You are a pragmatic technology startup guide helping a college founder plan a credible demo and a possible early product.
+You are a pragmatic technology startup guide helping a founder plan a real commercial technology startup.
 
 Startup name: ${data.startupName}
 Idea and problem: ${data.idea}
@@ -122,11 +122,11 @@ Planned launch location: ${data.launchLocation}
 
 Create one cohesive technology startup assessment, not separate overlapping generic and competitor analyses.
 The startup score must be an integer from 0 to 100 and is a directional rubric, not a validated prediction.
-Give concrete, feasible recommendations that a student team can demonstrate. Keep the initial architecture simple and explain what can be deferred until traction.
+Give concrete, feasible recommendations for a commercial launch. Keep the initial architecture practical and explain what can be deferred until traction.
 Estimate a real commercial launch budget in INR for the specific startup in ${data.launchLocation}, not a student project. Separate one-time setup and product development costs from monthly operating costs. Include locally relevant categories based on the idea (such as workspace only if required, equipment, commercially realistic staffing, connectivity, registration, hosting, marketing and operations). State team size, scope, timeframe and assumptions behind each range. Label all values as directional estimates rather than verified quotes, and do not invent exact current local prices or claim current price research.
 Do not invent market-size figures, adoption numbers, pricing, customer counts, technical benchmarks, citations, source URLs, or claims of live research.
 Competitors must be plausible candidates or alternatives only. For each, describe the likely offering and possible strengths/weaknesses, but set evidenceStatus to "Unverified AI-generated candidate" and sourceUrls to an empty array. Say clearly that this assessment did not perform live competitor research. Put differentiation ideas in this same competitor research section.
-Identify assumptions and validation steps explicitly. Mention security, privacy, scalability, and implementation risks. Keep recommendations neutral and useful for an academic demo.
+Identify assumptions and validation steps explicitly. Mention security, privacy, scalability, and implementation risks. Keep recommendations neutral and useful for a commercially viable launch.
 Return only valid JSON matching the supplied schema. Return no Markdown or text outside the JSON.
 `;
 
