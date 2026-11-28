@@ -11,7 +11,9 @@ export default function Hero() {
 
   return (
     <section className="relative isolate overflow-hidden bg-[#f3f7f6] px-5 pb-20 pt-32 sm:px-8 sm:pb-24 sm:pt-36">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_78%_20%,rgba(13,148,136,0.15),transparent_34%),radial-gradient(circle_at_8%_10%,rgba(132,204,22,0.10),transparent_26%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_78%_18%,rgba(20,184,166,0.24),transparent_34%),radial-gradient(ellipse_at_8%_16%,rgba(34,211,238,0.18),transparent_28%),radial-gradient(ellipse_at_92%_78%,rgba(168,85,247,0.16),transparent_30%),radial-gradient(ellipse_at_24%_90%,rgba(132,204,22,0.14),transparent_28%)]" />
+      <div className="pointer-events-none absolute -right-28 top-20 -z-10 h-96 w-96 rounded-full bg-cyan-300/20 blur-3xl" />
+      <div className="pointer-events-none absolute -left-28 bottom-0 -z-10 h-80 w-80 rounded-full bg-violet-300/15 blur-3xl" />
       <div className="mx-auto grid max-w-[1320px] items-center gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
         <div className="max-w-2xl">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white/80 px-3.5 py-2 text-xs font-bold tracking-wide text-teal-800 shadow-sm">
