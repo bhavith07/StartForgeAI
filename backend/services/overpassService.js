@@ -43,6 +43,16 @@ const CATEGORY_TAGS = {
   bakery: [["shop", "bakery"]],
   furniture: [["shop", "furniture"]],
   coworking: [["office", "coworking"]],
+  "technology companies": [["office", "it"], ["office", "software"], ["office", "telecommunication"], ["office", "technology"], ["office", "computer"], ["company", "it"], ["company", "software"], ["company", "software_development"], ["company", "telecommunication"], ["company", "startup"], ["company:startup", "yes"], ["name", "startup"]],
+  "tech companies": [["office", "it"], ["office", "software"], ["office", "telecommunication"], ["office", "technology"], ["office", "computer"], ["company", "it"], ["company", "software"], ["company", "software_development"], ["company", "telecommunication"], ["company", "startup"], ["company:startup", "yes"], ["name", "startup"]],
+  "software companies": [["office", "it"], ["office", "software"], ["office", "technology"], ["office", "computer"], ["company", "it"], ["company", "software"], ["company", "software_development"], ["company", "startup"], ["company:startup", "yes"], ["name", "startup"]],
+  "software company": [["office", "it"], ["office", "software"], ["office", "technology"], ["office", "computer"], ["company", "it"], ["company", "software"], ["company", "software_development"], ["company", "startup"], ["company:startup", "yes"], ["name", "startup"]],
+  "it companies": [["office", "it"], ["office", "software"], ["office", "technology"], ["office", "computer"], ["company", "it"], ["company", "software"], ["company", "software_development"], ["company", "telecommunication"], ["company", "startup"], ["company:startup", "yes"], ["name", "startup"]],
+  "it company": [["office", "it"], ["office", "software"], ["office", "technology"], ["office", "computer"], ["company", "it"], ["company", "software"], ["company", "software_development"], ["company", "startup"], ["company:startup", "yes"], ["name", "startup"]],
+  "ai companies": [["office", "it"], ["office", "software"], ["office", "technology"], ["company", "it"], ["company", "software"], ["company", "software_development"], ["company", "startup"], ["company:startup", "yes"], ["name", "startup"]],
+  "ai startups": [["office", "it"], ["office", "software"], ["office", "technology"], ["company", "it"], ["company", "software"], ["company", "software_development"], ["company", "startup"], ["company:startup", "yes"], ["name", "startup"]],
+  "tech startups": [["office", "it"], ["office", "software"], ["office", "technology"], ["company", "it"], ["company", "software"], ["company", "software_development"], ["company", "startup"], ["company:startup", "yes"], ["name", "startup"]],
+  startups: [["office", "it"], ["office", "software"], ["office", "technology"], ["company", "it"], ["company", "software"], ["company", "software_development"], ["company", "startup"], ["company:startup", "yes"], ["name", "startup"]],
 };
 
 const CACHE_TTL_MS = 15 * 60 * 1000;

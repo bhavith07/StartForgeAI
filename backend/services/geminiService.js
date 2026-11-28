@@ -111,28 +111,30 @@ export async function analyzeStartup(data) {
   });
 
   const prompt = `
-You are an experienced startup consultant.
+You are a pragmatic technology startup guide helping a founder plan a real commercial technology startup.
 
-Analyze this startup idea realistically.
-
-Startup Name: ${data.startupName}
-Idea: ${data.idea}
+Startup name: ${data.startupName}
+Idea and problem: ${data.idea}
 Industry: ${data.industry}
-Target Audience: ${data.audience}
-Business Model: ${data.model}
+Target users: ${data.audience}
+Business model: ${data.model}
+Planned launch location: ${data.launchLocation}
 
-Return only valid JSON matching the supplied schema.
-
-Provide realistic and actionable analysis.
-The startup score must be an integer from 0 to 100.
-Include 3 to 5 potential competitors or comparable businesses.
-Clearly distinguish potential competitors from verified research.
-Do not invent exact market statistics.
-Provide at least 3 items in each list.
-Estimated cost must be an approximate MVP cost range in INR.
-Return no Markdown or text outside the JSON.
+Create one cohesive technology startup assessment, not separate overlapping generic and competitor analyses.
+The startup score must be an integer from 0 to 100 and is a directional rubric, not a validated prediction.
+Give concrete, feasible recommendations for a commercial launch. Keep the initial architecture practical and explain what can be deferred until traction.
+Estimate a real commercial launch budget in INR for the specific startup in ${data.launchLocation}, not a student project. Separate one-time setup and product development costs from monthly operating costs. Include locally relevant categories based on the idea (such as workspace only if required, equipment, commercially realistic staffing, connectivity, registration, hosting, marketing and operations). State team size, scope, timeframe and assumptions behind each range. Label all values as directional estimates rather than verified quotes, and do not invent exact current local prices or claim current price research.
+Do not invent market-size figures, adoption numbers, pricing, customer counts, technical benchmarks, citations, source URLs, or claims of live research.
+Competitors must be plausible candidates or alternatives only. For each, describe the likely offering and possible strengths/weaknesses, but set evidenceStatus to "Unverified AI-generated candidate" and sourceUrls to an empty array. Say clearly that this assessment did not perform live competitor research. Put differentiation ideas in this same competitor research section.
+Identify assumptions and validation steps explicitly. Mention security, privacy, scalability, and implementation risks. Keep recommendations neutral and useful for a commercially viable launch.
+Return only valid JSON matching the supplied schema. Return no Markdown or text outside the JSON.
 `;
 
+  const stringList = { type: "ARRAY", items: { type: "STRING" } };
+  const objectList = (properties, required) => ({
+    type: "ARRAY",
+    items: { type: "OBJECT", properties, required },
+  });
   const schema = {
     type: "OBJECT",
     properties: {
@@ -140,80 +142,85 @@ Return no Markdown or text outside the JSON.
       marketPotential: { type: "STRING" },
       targetMarket: { type: "STRING" },
       growthPotential: { type: "STRING" },
-      competition: { type: "STRING" },
       estimatedCost: { type: "STRING" },
-
-      marketChallenges: {
-        type: "ARRAY",
-        items: { type: "STRING" },
-      },
-
-      competitors: {
-        type: "ARRAY",
-        items: {
-          type: "OBJECT",
-          properties: {
-            name: { type: "STRING" },
-            description: { type: "STRING" },
-            strength: { type: "STRING" },
-            weakness: { type: "STRING" },
+      strengths: stringList,
+      weaknesses: stringList,
+      suggestions: stringList,
+      founderGuide: {
+        type: "OBJECT",
+        properties: {
+          problemUseCase: { type: "STRING" },
+          targetUsers: { type: "STRING" },
+          technicalSolution: {
+            type: "OBJECT",
+            properties: {
+              overview: { type: "STRING" },
+              architectureComponents: objectList(
+                { component: { type: "STRING" }, responsibility: { type: "STRING" } },
+                ["component", "responsibility"]
+              ),
+            },
+            required: ["overview", "architectureComponents"],
           },
-          required: [
-            "name",
-            "description",
-            "strength",
-            "weakness",
-          ],
+          coreMvpFeatures: stringList,
+          recommendedTechStack: objectList(
+            { layer: { type: "STRING" }, recommendation: { type: "STRING" }, reason: { type: "STRING" } },
+            ["layer", "recommendation", "reason"]
+          ),
+          developmentPhases: objectList(
+            { phase: { type: "STRING" }, duration: { type: "STRING" }, deliverables: stringList },
+            ["phase", "duration", "deliverables"]
+          ),
+          costEstimates: {
+            type: "OBJECT",
+            properties: {
+              currency: { type: "STRING" },
+              developmentRange: { type: "STRING" },
+              developmentAssumptions: stringList,
+              monthlyOperatingCosts: objectList(
+                { category: { type: "STRING" }, range: { type: "STRING" }, assumption: { type: "STRING" } },
+                ["category", "range", "assumption"]
+              ),
+            },
+            required: ["currency", "developmentRange", "developmentAssumptions", "monthlyOperatingCosts"],
+          },
+          risks: objectList(
+            { risk: { type: "STRING" }, severity: { type: "STRING" }, mitigation: { type: "STRING" } },
+            ["risk", "severity", "mitigation"]
+          ),
+          marketPotential: {
+            type: "OBJECT",
+            properties: { opportunity: { type: "STRING" }, assumptions: stringList, validationSteps: stringList },
+            required: ["opportunity", "assumptions", "validationSteps"],
+          },
+          competitorResearch: {
+            type: "OBJECT",
+            properties: {
+              evidenceStatus: { type: "STRING" },
+              limitation: { type: "STRING" },
+              candidates: objectList(
+                {
+                  name: { type: "STRING" },
+                  offering: { type: "STRING" },
+                  targetUsers: { type: "STRING" },
+                  strengths: stringList,
+                  weaknesses: stringList,
+                  differentiationOpportunities: stringList,
+                  evidenceStatus: { type: "STRING" },
+                  sourceUrls: stringList,
+                },
+                ["name", "offering", "targetUsers", "strengths", "weaknesses", "differentiationOpportunities", "evidenceStatus", "sourceUrls"]
+              ),
+              followUp: { type: "STRING" },
+            },
+            required: ["evidenceStatus", "limitation", "candidates", "followUp"],
+          },
+          assumptions: stringList,
         },
-      },
-
-      competitorStrengths: {
-        type: "ARRAY",
-        items: { type: "STRING" },
-      },
-
-      competitorWeaknesses: {
-        type: "ARRAY",
-        items: { type: "STRING" },
-      },
-
-      differentiationOpportunities: {
-        type: "ARRAY",
-        items: { type: "STRING" },
-      },
-
-      strengths: {
-        type: "ARRAY",
-        items: { type: "STRING" },
-      },
-
-      weaknesses: {
-        type: "ARRAY",
-        items: { type: "STRING" },
-      },
-
-      suggestions: {
-        type: "ARRAY",
-        items: { type: "STRING" },
+        required: ["problemUseCase", "targetUsers", "technicalSolution", "coreMvpFeatures", "recommendedTechStack", "developmentPhases", "costEstimates", "risks", "marketPotential", "competitorResearch", "assumptions"],
       },
     },
-
-    required: [
-      "startupScore",
-      "marketPotential",
-      "targetMarket",
-      "growthPotential",
-      "competition",
-      "estimatedCost",
-      "marketChallenges",
-      "competitors",
-      "competitorStrengths",
-      "competitorWeaknesses",
-      "differentiationOpportunities",
-      "strengths",
-      "weaknesses",
-      "suggestions",
-    ],
+    required: ["startupScore", "marketPotential", "targetMarket", "growthPotential", "estimatedCost", "strengths", "weaknesses", "suggestions", "founderGuide"],
   };
 
   try {
@@ -235,6 +242,16 @@ Return no Markdown or text outside the JSON.
     ) {
       throw new Error("Gemini returned an invalid startup score.");
     }
+
+    if (!parsed.founderGuide || !parsed.founderGuide.competitorResearch) {
+      throw new Error("Gemini returned an incomplete technology startup guide.");
+    }
+    parsed.founderGuide.competitorResearch.evidenceStatus = "Unverified AI-generated candidates; no live research was performed.";
+    parsed.founderGuide.competitorResearch.candidates = (parsed.founderGuide.competitorResearch.candidates || []).map((candidate) => ({
+      ...candidate,
+      evidenceStatus: "Unverified AI-generated candidate",
+      sourceUrls: [],
+    }));
 
     console.log("Startup analysis generated successfully.");
 

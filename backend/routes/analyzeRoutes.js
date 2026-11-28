@@ -20,9 +20,10 @@ router.post("/", authenticateToken, async (req, res) => {
       industry,
       audience,
       model,
+      launchLocation,
     } = req.body;
 
-    if (!startupName || !idea) {
+    if (!startupName || !idea || !String(launchLocation || "").trim()) {
       return res.status(400).json({
         success: false,
         message: "Startup name and idea are required.",
@@ -38,6 +39,7 @@ router.post("/", authenticateToken, async (req, res) => {
       industry,
       audience,
       model,
+      launchLocation: String(launchLocation).trim(),
     });
 
     let parsedAnalysis;
@@ -77,21 +79,23 @@ router.post("/", authenticateToken, async (req, res) => {
       industry,
       audience,
       model,
+      launchLocation: String(launchLocation).trim(),
 
       startupScore: score,
       marketPotential: parsedAnalysis.marketPotential,
-      competition: parsedAnalysis.competition,
+      competition: parsedAnalysis.competition || "",
       estimatedCost: parsedAnalysis.estimatedCost,
 
       targetMarket: parsedAnalysis.targetMarket,
       growthPotential: parsedAnalysis.growthPotential,
 
-      marketChallenges: parsedAnalysis.marketChallenges,
-      competitors: parsedAnalysis.competitors,
-      competitorStrengths: parsedAnalysis.competitorStrengths,
-      competitorWeaknesses: parsedAnalysis.competitorWeaknesses,
+      marketChallenges: parsedAnalysis.marketChallenges || [],
+      competitors: parsedAnalysis.competitors || [],
+      competitorStrengths: parsedAnalysis.competitorStrengths || [],
+      competitorWeaknesses: parsedAnalysis.competitorWeaknesses || [],
       differentiationOpportunities:
         parsedAnalysis.differentiationOpportunities,
+      founderGuide: parsedAnalysis.founderGuide,
 
       strengths: parsedAnalysis.strengths,
       weaknesses: parsedAnalysis.weaknesses,
@@ -111,9 +115,7 @@ router.post("/", authenticateToken, async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message:
-        error.message ||
-        "Failed to analyze startup. Please try again.",
+      message: error.message || "Failed to analyze startup. Please try again.",
     });
   }
 });

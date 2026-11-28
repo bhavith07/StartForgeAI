@@ -12,3 +12,9 @@ and also it contains login athentcation system.
 also improved the navebar.
 Currently its in development phase.
 Thank you .
+
+## Technology founder guide upgrade
+
+New startup assessments save a structured `founder_guide` JSONB payload in the existing `startup_analyses` table. Apply `backend/migrations/005_add_founder_guide.sql` to the same PostgreSQL database before starting the updated backend. The migration is additive and leaves existing report rows available; older rows continue to use the legacy report view.
+
+The backend defaults to the current `gemini-3.8-flash` model. `GEMINI_MODEL` can override the model and `GEMINI_API_KEY` remains required. Token access and quotas depend on the Gemini API project's tier. Google Search grounding used by the separate industry competitor research action is not available on the Gemini 3 free API tier; this assessment does not enable grounding or trigger search calls.

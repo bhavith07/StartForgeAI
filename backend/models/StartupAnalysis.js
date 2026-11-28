@@ -12,6 +12,7 @@ export async function createAnalysis(analysis) {
       industry,
       audience,
       business_model,
+      launch_location,
       startup_score,
       market_potential,
       competition,
@@ -23,14 +24,15 @@ export async function createAnalysis(analysis) {
       competitor_strengths,
       competitor_weaknesses,
       differentiation_opportunities,
+      founder_guide,
       strengths,
       weaknesses,
       suggestions,
       created_at
     )
     VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-      $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
+      $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
     )
     RETURNING *
     `,
@@ -41,6 +43,7 @@ export async function createAnalysis(analysis) {
       analysis.industry,
       analysis.audience,
       analysis.model,
+      analysis.launchLocation,
       analysis.startupScore,
       analysis.marketPotential,
       analysis.competition,
@@ -52,6 +55,7 @@ export async function createAnalysis(analysis) {
       JSON.stringify(analysis.competitorStrengths || []),
       JSON.stringify(analysis.competitorWeaknesses || []),
       JSON.stringify(analysis.differentiationOpportunities || []),
+      JSON.stringify(analysis.founderGuide || {}),
       JSON.stringify(analysis.strengths || []),
       JSON.stringify(analysis.weaknesses || []),
       JSON.stringify(analysis.suggestions || []),
