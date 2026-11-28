@@ -38,35 +38,35 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-xl">
-        <div className="flex h-[68px] items-center gap-4 px-4 sm:px-7">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-gradient-to-r from-[#102b3b] via-[#124b50] to-[#087f75] shadow-[0_8px_30px_-16px_rgba(5,35,45,0.8)]">
+        <div className="flex h-[72px] items-center gap-4 px-4 sm:px-7">
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
             aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={menuOpen}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-lime-200/40 bg-lime-300 text-[#173b3b] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-lime-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             {menuOpen ? <X size={21} /> : <Menu size={21} />}
           </button>
 
-          <button onClick={() => go(homePath)} className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 text-white">🚀</span>
-            <span>StartForge <span className="text-teal-600">AI</span></span>
+          <button onClick={() => go(homePath)} className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight text-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/20">🚀</span>
+            <span>StartForge <span className="text-lime-300">AI</span></span>
           </button>
 
           <div className="ml-auto flex items-center gap-3">
             {isLoggedIn ? (
               <>
-                <span className="hidden text-sm font-medium text-slate-600 sm:inline">Welcome, {user?.name || "Founder"}</span>
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-50 text-sm font-bold text-teal-700">
+                <span className="hidden text-sm font-medium text-teal-50 sm:inline">Welcome, {user?.name || "Founder"}</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white/15 text-sm font-bold text-lime-200">
                   {user?.name?.charAt(0)?.toUpperCase() || <UserCircle size={18} />}
                 </span>
               </>
             ) : (
               <>
-                <button onClick={() => go("/login")} className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100">Login</button>
-                <button onClick={() => go("/register")} className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700">Get Started</button>
+                <button onClick={() => go("/login")} className="rounded-lg px-3 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10">Login</button>
+                <button onClick={() => go("/register")} className="rounded-lg bg-lime-300 px-4 py-2 text-sm font-bold text-[#173b3b] transition hover:bg-lime-200">Get Started</button>
               </>
             )}
           </div>
@@ -75,14 +75,14 @@ export default function Navbar() {
 
       {menuOpen && (
         <>
-          <button aria-label="Close navigation menu" onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 bg-slate-950/35" />
-          <aside className="fixed bottom-0 left-0 top-[68px] z-50 flex w-[min(88vw,310px)] flex-col border-r border-slate-200 bg-white p-4 shadow-2xl">
-            <div className="mb-4 rounded-2xl bg-gradient-to-br from-[#20364d] to-[#0f766e] p-4 text-white">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-teal-100">
+          <button aria-label="Close navigation menu" onClick={() => setMenuOpen(false)} className="fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-[2px]" />
+          <aside className="fixed bottom-0 left-0 top-[72px] z-50 flex w-[min(88vw,310px)] flex-col border-r border-slate-200 bg-white p-4 shadow-2xl">
+            <div className="mb-4 rounded-2xl bg-gradient-to-br from-[#142f43] via-[#155b5b] to-[#078477] p-4 text-white shadow-lg">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-lime-200">
                 <Sparkles size={14} /> {isLoggedIn ? "Founder workspace" : "Explore StartForge"}
               </div>
               <p className="mt-2 text-lg font-bold">{isLoggedIn ? user?.name || "Welcome back" : "Build your next big idea"}</p>
-              <p className="mt-1 text-xs leading-5 text-slate-200">Your startup research tools, all in one place.</p>
+              <p className="mt-1 text-xs leading-5 text-teal-50">Your startup research tools, all in one place.</p>
             </div>
 
             <nav className="flex-1 space-y-5 overflow-y-auto">
@@ -114,7 +114,6 @@ export default function Navbar() {
                 <div>
                   <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Discover</p>
                   <button className={itemClass} onClick={() => goToSection("features")}>Features</button>
-                  <button className={itemClass} onClick={() => goToSection("how-it-works")}>How It Works</button>
                 </div>
               )}
             </nav>
@@ -125,7 +124,7 @@ export default function Navbar() {
                   <LogOut size={18} /> Logout
                 </button>
               ) : (
-                <button onClick={() => go("/register")} className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-teal-700">
+                <button onClick={() => go("/register")} className="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white transition hover:bg-teal-800">
                   Create an account <ChevronRight size={16} />
                 </button>
               )}
