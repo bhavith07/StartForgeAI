@@ -1264,12 +1264,11 @@ export default function CompetitorAnalysis() {
               <input
                 value={location}
                 onChange={(event) => setLocation(event.target.value)}
-                placeholder="e.g. Mangaluru, Karnataka (city or area)"
+                placeholder="e.g. Mangaluru, Karnataka"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
                 maxLength={160}
                 required
               />
-              <span className="mt-1 block text-xs text-slate-500">Use a city or neighbourhood; the radius is measured from one point, so a state name is too broad.</span>
             </label>
             <label className="block">
               <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
