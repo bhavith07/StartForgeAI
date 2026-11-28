@@ -20,9 +20,10 @@ router.post("/", authenticateToken, async (req, res) => {
       industry,
       audience,
       model,
+      launchLocation,
     } = req.body;
 
-    if (!startupName || !idea) {
+    if (!startupName || !idea || !String(launchLocation || "").trim()) {
       return res.status(400).json({
         success: false,
         message: "Startup name and idea are required.",
@@ -38,6 +39,7 @@ router.post("/", authenticateToken, async (req, res) => {
       industry,
       audience,
       model,
+      launchLocation: String(launchLocation).trim(),
     });
 
     let parsedAnalysis;
@@ -77,6 +79,7 @@ router.post("/", authenticateToken, async (req, res) => {
       industry,
       audience,
       model,
+      launchLocation: String(launchLocation).trim(),
 
       startupScore: score,
       marketPotential: parsedAnalysis.marketPotential,

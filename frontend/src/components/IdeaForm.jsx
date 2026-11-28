@@ -47,6 +47,7 @@ export default function IdeaForm() {
     industry: "",
     audience: "",
     model: "",
+    launchLocation: "",
   });
 
   const [result, setResult] = useState(null);
@@ -400,14 +401,14 @@ export default function IdeaForm() {
       addList(differentiationOpportunities, colors.cyan);
     }
 
+    addSection("AI Recommendations", colors.purple);
+    addList(suggestions, colors.purple);
+
     addSection("Startup Strengths", colors.green);
     addList(strengths, colors.green);
 
     addSection("Startup Weaknesses", colors.red);
     addList(weaknesses, colors.red);
-
-    addSection("AI Recommendations", colors.purple);
-    addList(suggestions, colors.purple);
 
     // Consistent footer and page numbering on every page.
     const totalPages = doc.getNumberOfPages();
@@ -564,6 +565,13 @@ export default function IdeaForm() {
                     <option value="Software plus implementation services">Software subscription plus setup or support services</option>
                   </select>
                   <p className="mt-2 text-xs leading-5 text-slate-500">Choose how the technology product will earn revenue.</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <label htmlFor="launchLocation" className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                    <MapPin size={16} className="text-teal-700" /> Planned launch location
+                  </label>
+                  <input id="launchLocation" name="launchLocation" value={form.launchLocation} onChange={handleChange} required maxLength={160} placeholder="e.g. Mangalore, Karnataka" className={inputClass} />
+                  <p className="mt-2 text-xs leading-5 text-slate-500">Used to tailor rent, staffing, setup and operating cost ranges. Estimates are directional and based on stated assumptions.</p>
                 </div>
               </div>
             </div>

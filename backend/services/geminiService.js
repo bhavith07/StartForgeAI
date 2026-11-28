@@ -118,11 +118,12 @@ Idea and problem: ${data.idea}
 Industry: ${data.industry}
 Target users: ${data.audience}
 Business model: ${data.model}
+Planned launch location: ${data.launchLocation}
 
 Create one cohesive technology startup assessment, not separate overlapping generic and competitor analyses.
 The startup score must be an integer from 0 to 100 and is a directional rubric, not a validated prediction.
 Give concrete, feasible recommendations that a student team can demonstrate. Keep the initial architecture simple and explain what can be deferred until traction.
-Estimate Indian rupee (INR) ranges for a student-built MVP: one-time development effort/cost and monthly operating costs. State the assumptions behind every range; label them as estimates, not quotes. Do not include precise current vendor prices unless verified.
+Estimate a real commercial launch budget in INR for the specific startup in ${data.launchLocation}, not a student project. Separate one-time setup and product development costs from monthly operating costs. Include locally relevant categories based on the idea (such as workspace only if required, equipment, commercially realistic staffing, connectivity, registration, hosting, marketing and operations). State team size, scope, timeframe and assumptions behind each range. Label all values as directional estimates rather than verified quotes, and do not invent exact current local prices or claim current price research.
 Do not invent market-size figures, adoption numbers, pricing, customer counts, technical benchmarks, citations, source URLs, or claims of live research.
 Competitors must be plausible candidates or alternatives only. For each, describe the likely offering and possible strengths/weaknesses, but set evidenceStatus to "Unverified AI-generated candidate" and sourceUrls to an empty array. Say clearly that this assessment did not perform live competitor research. Put differentiation ideas in this same competitor research section.
 Identify assumptions and validation steps explicitly. Mention security, privacy, scalability, and implementation risks. Keep recommendations neutral and useful for an academic demo.
