@@ -196,6 +196,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+          </div>
         </section>
 
         {/* Quick access */}
