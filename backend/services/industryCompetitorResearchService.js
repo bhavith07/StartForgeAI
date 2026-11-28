@@ -30,7 +30,7 @@ export async function researchIndustryCompetitors({ idea, industry, targetMarket
   if (!process.env.GEMINI_API_KEY) throw httpError("GEMINI_API_KEY is missing from backend/.env.", 500);
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   const prompt = `
-Research real competitors for a startup founder. Use Google Search grounding and cite verifiable sources.
+Research competitors for a startup founder. Use Google Search grounding when available and cite verifiable sources. If live search is unavailable, provide only clearly labelled unverified candidates and do not invent citations or official URLs.
 Startup idea: ${idea}
 Industry/category: ${industry}
 Target market/geography: ${targetMarket || "Global"}
@@ -53,6 +53,7 @@ Rules:
 - Keep source-backed facts distinct from your own strategic hypotheses.
 `;
   let response;
+  let liveSearchUsed = true;
   try {
     response = await ai.models.generateContent({
       model: MODEL,
@@ -64,7 +65,15 @@ Rules:
     });
   } catch (error) {
     console.error("Industry competitor research provider error:", error);
-    throw httpError("Industry research could not be completed. Check that your Gemini API project supports Google Search grounding and try again.", 502);
+    liveSearchUsed = false;
+    response = await ai.models.generateContent({
+      model: MODEL,
+      contents: `${prompt}\nLive search is unavailable for this request. Return plausible candidate companies from general knowledge only. Set every fact that is uncertain to 'Unverified'; set website to null unless you are certain, and do not present any claim as researched or current.`,
+      config: { temperature: 0.2 },
+    }).catch((fallbackError) => {
+      console.error("Industry competitor fallback error:", fallbackError);
+      throw httpError("Industry suggestions could not be generated. Check the Gemini API key and quota, then try again.", 502);
+    });
   }
 
   const parsed = extractJson(response.text);
@@ -84,12 +93,12 @@ Rules:
     .filter((item) => item && typeof item.name === "string" && item.name.trim())
     .map((item) => ({
       name: item.name.trim().slice(0, 140),
-      website: normalizeUrl(item.website),
+      website: liveSearchUsed ? normalizeUrl(item.website) : null,
       description: String(item.description || "Not established from sources").slice(0, 700),
       targetCustomers: String(item.targetCustomers || "Not established from sources").slice(0, 300),
       geography: String(item.geography || "Not established from sources").slice(0, 240),
       differentiation: String(item.differentiation || "Not established from sources").slice(0, 500),
-      evidence: String(item.evidence || "See linked research sources").slice(0, 500),
+      evidence: liveSearchUsed ? String(item.evidence || "See linked research sources").slice(0, 500) : "Unverified AI-generated candidate. Confirm this company and its offering independently.",
     }));
 
   return {
@@ -98,8 +107,11 @@ Rules:
     opportunities: Array.isArray(parsed.opportunities) ? parsed.opportunities.filter((x) => typeof x === "string").slice(0, 8).map((x) => x.slice(0, 500)) : [],
     caveats: Array.isArray(parsed.caveats) ? parsed.caveats.filter((x) => typeof x === "string").slice(0, 8).map((x) => x.slice(0, 500)) : [],
     sources,
+    evidenceStatus: liveSearchUsed ? "Live search used; verify sources" : "Unverified AI-generated candidates; live search unavailable",
     model: MODEL,
     researchedAt: new Date().toISOString(),
-    notice: "Research is a sourced starting point, not an exhaustive competitor census. Verify company details and market positioning before making business decisions.",
+    notice: liveSearchUsed
+      ? "Research is a sourced starting point, not an exhaustive competitor census. Verify company details and market positioning before making business decisions."
+      : "Google Search grounding was unavailable. These are unverified AI-generated candidates, not live research. No sources were checked; verify every company independently.",
   };
 }
