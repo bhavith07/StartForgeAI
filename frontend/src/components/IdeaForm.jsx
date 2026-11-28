@@ -493,7 +493,7 @@ export default function IdeaForm() {
                   id="idea"
                   rows={5}
                   name="idea"
-                  placeholder="What problem does your startup solve? How will your product or service work?"
+                  placeholder="What problem does your software or technology product solve? How will it work, and who will use it?"
                   value={form.idea}
                   onChange={handleChange}
                   required
@@ -505,31 +505,45 @@ export default function IdeaForm() {
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label htmlFor="industry" className="flex items-center gap-2 text-sm font-bold text-slate-800">
-                    <ChartNoAxesCombined size={16} className="text-teal-700" /> Industry
+                    <ChartNoAxesCombined size={16} className="text-teal-700" /> Technology sector
                   </label>
                   <select id="industry" name="industry" value={form.industry} onChange={handleChange} required className={selectClass}>
-                    <option value="">Select industry</option>
-                    <option value="Education">Education and learning</option>
-                    <option value="Healthcare">Health and wellness</option>
-                    <option value="Finance">Finance and money</option>
-                    <option value="E-Commerce">Online shopping and selling</option>
-                    <option value="AI">Artificial intelligence (AI)</option>
+                    <option value="">Select a technology sector</option>
+                    <option value="SaaS and B2B Software">SaaS and B2B software</option>
+                    <option value="AI and Machine Learning">AI and machine learning</option>
+                    <option value="FinTech and Payments">FinTech and payments</option>
+                    <option value="HealthTech and MedTech">HealthTech and MedTech</option>
+                    <option value="EdTech">EdTech and learning platforms</option>
+                    <option value="E-commerce and Marketplaces">E-commerce and marketplaces</option>
+                    <option value="Developer Tools and APIs">Developer tools and APIs</option>
+                    <option value="Cybersecurity and Privacy">Cybersecurity and privacy</option>
+                    <option value="Cloud, DevOps and Infrastructure">Cloud, DevOps and infrastructure</option>
+                    <option value="Data and Analytics">Data and analytics</option>
+                    <option value="IoT and Hardware">IoT and connected hardware</option>
+                    <option value="IT Services and Software Development">IT services and software development</option>
+                    <option value="Other Technology">Other technology sector</option>
                   </select>
-                  <p className="mt-2 text-xs leading-5 text-slate-500">Choose the field your idea is focused on.</p>
+                  <p className="mt-2 text-xs leading-5 text-slate-500">Choose the technology market your product serves.</p>
                 </div>
 
                 <div>
                   <label htmlFor="audience" className="flex items-center gap-2 text-sm font-bold text-slate-800">
-                    <Users size={16} className="text-teal-700" /> Target audience
+                    <Users size={16} className="text-teal-700" /> Target users / customers
                   </label>
                   <select id="audience" name="audience" value={form.audience} onChange={handleChange} required className={selectClass}>
-                    <option value="">Select audience</option>
-                    <option value="Students">Students</option>
-                    <option value="Businesses">Businesses or companies</option>
-                    <option value="Professionals">Working professionals</option>
-                    <option value="General Public">Everyday consumers</option>
+                    <option value="">Select target users or customers</option>
+                    <option value="Startups and Founders">Startups and founders</option>
+                    <option value="Small and Medium Businesses">Small and medium businesses</option>
+                    <option value="Enterprise Teams">Enterprise teams and departments</option>
+                    <option value="Developers and Engineering Teams">Developers and engineering teams</option>
+                    <option value="Students and Educators">Students and educators</option>
+                    <option value="Consumers and Individual Users">Consumers and individual users</option>
+                    <option value="Online Sellers and Marketplace Vendors">Online sellers and marketplace vendors</option>
+                    <option value="Creators and Freelancers">Creators and freelancers</option>
+                    <option value="Healthcare Providers and Patients">Healthcare providers and patients</option>
+                    <option value="Other Technology Users">Other technology users</option>
                   </select>
-                  <p className="mt-2 text-xs leading-5 text-slate-500">Who do you expect to use or pay for it?</p>
+                  <p className="mt-2 text-xs leading-5 text-slate-500">Choose the people or organizations expected to use or pay for it.</p>
                 </div>
 
                 <div className="sm:col-span-2">
