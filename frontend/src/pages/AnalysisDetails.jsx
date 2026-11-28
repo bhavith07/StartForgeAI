@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { jsPDF } from "jspdf";
+import FounderGuideSections from "../components/FounderGuideSections";
+import { addFounderGuidePdf } from "../utils/founderGuidePdf";
 
 import { useAuth } from "../context/AuthContext";
 import API_BASE_URL from "../config/api";
@@ -179,6 +181,9 @@ export default function AnalysisDetails() {
     analysis?.differentiation_opportunities ??
     analysis?.differentiationOpportunities
   );
+  const founderGuide = analysis?.founder_guide && Object.keys(analysis.founder_guide).length
+    ? analysis.founder_guide
+    : null;
 
   const downloadPDF = () => {
     if (!analysis) return;
@@ -343,7 +348,7 @@ export default function AnalysisDetails() {
     doc.text("STARTFORGE AI", left, 17);
     doc.setFontSize(21);
     doc.setTextColor(...colors.white);
-    doc.text("Startup Analysis Report", left, 29);
+    doc.text(founderGuide ? "Technology Startup Guide" : "Startup Analysis Report", left, 29);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(203, 213, 225);
@@ -378,6 +383,12 @@ export default function AnalysisDetails() {
     doc.setFontSize(18);
     doc.setTextColor(...colors.cyan);
     doc.text(`${safeText(analysis.startup_score, "--")} / 100`, left + 6, y + 13);
+    if (founderGuide) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...colors.muted);
+      doc.text("Directional AI rubric; not a validated forecast.", left + 35, y + 13);
+    }
     y += 27;
 
     addSection("Startup Information");
@@ -385,46 +396,45 @@ export default function AnalysisDetails() {
     addLabelValue("Business Model", analysis.business_model);
     addLabelValue("Startup Idea", analysis.idea);
 
-    addSection("Core Assessment");
-    addLabelValue("Market Potential", analysis.market_potential);
-    addLabelValue("Competition", analysis.competition);
-    addLabelValue("Estimated Cost", analysis.estimated_cost);
-
-    addSection("Market Analysis");
-    addLabelValue("Target Market", analysis.target_market);
-    addLabelValue("Growth Potential", analysis.growth_potential);
-    addSection("Market Challenges", colors.amber);
-    addList(marketChallenges, colors.amber);
-
-    addSection("Competitor Analysis", colors.purple);
-    if (competitors.length) {
-      competitors.forEach((competitor, index) => {
-        ensureSpace(22);
-        const name = getCompetitorName(competitor);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(...colors.purple);
-        doc.text(`${index + 1}. ${name}`, left, y);
-        y += 6;
-        const description = getCompetitorDescription(competitor);
-        const strength = getCompetitorStrength(competitor);
-        const weakness = getCompetitorWeakness(competitor);
-        if (description) addWrapped(description, { fontSize: 9.5, after: 2 });
-        if (strength) addWrapped(strength, { fontSize: 9, color: colors.green, after: 2 });
-        if (weakness) addWrapped(weakness, { fontSize: 9, color: colors.red, after: 5 });
-      });
+    if (founderGuide) {
+      addFounderGuidePdf(founderGuide, addSection, addWrapped, addList, colors);
     } else {
-      addWrapped("No competitor details available.", { color: colors.muted });
+      addSection("Core Assessment");
+      addLabelValue("Market Potential", analysis.market_potential);
+      addLabelValue("Competition", analysis.competition);
+      addLabelValue("Estimated Cost", analysis.estimated_cost);
+      addSection("Market Analysis");
+      addLabelValue("Target Market", analysis.target_market);
+      addLabelValue("Growth Potential", analysis.growth_potential);
+      addSection("Market Challenges", colors.amber);
+      addList(marketChallenges, colors.amber);
+      addSection("Competitor Analysis", colors.purple);
+      if (competitors.length) {
+        competitors.forEach((competitor, index) => {
+          ensureSpace(22);
+          const name = getCompetitorName(competitor);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(11);
+          doc.setTextColor(...colors.purple);
+          doc.text(`${index + 1}. ${name}`, left, y);
+          y += 6;
+          const description = getCompetitorDescription(competitor);
+          const strength = getCompetitorStrength(competitor);
+          const weakness = getCompetitorWeakness(competitor);
+          if (description) addWrapped(description, { fontSize: 9.5, after: 2 });
+          if (strength) addWrapped(strength, { fontSize: 9, color: colors.green, after: 2 });
+          if (weakness) addWrapped(weakness, { fontSize: 9, color: colors.red, after: 5 });
+        });
+      } else {
+        addWrapped("No competitor details available.", { color: colors.muted });
+      }
+      addSection("Competitor Strengths", colors.green);
+      addList(competitorStrengths, colors.green);
+      addSection("Competitor Weaknesses", colors.red);
+      addList(competitorWeaknesses, colors.red);
+      addSection("Differentiation Opportunities", colors.cyan);
+      addList(differentiationOpportunities, colors.cyan);
     }
-
-    addSection("Competitor Strengths", colors.green);
-    addList(competitorStrengths, colors.green);
-
-    addSection("Competitor Weaknesses", colors.red);
-    addList(competitorWeaknesses, colors.red);
-
-    addSection("Differentiation Opportunities", colors.cyan);
-    addList(differentiationOpportunities, colors.cyan);
 
     addSection("Startup Strengths", colors.green);
     addList(strengths, colors.green);
@@ -609,6 +619,7 @@ export default function AnalysisDetails() {
               </p>
 
               <p className="mt-2 text-sm font-semibold text-slate-600">out of 100</p>
+              {founderGuide && <p className="mt-2 text-xs leading-5 text-slate-500">Directional AI rubric; not a validated forecast.</p>}
 
             </div>
 
@@ -644,7 +655,7 @@ export default function AnalysisDetails() {
 
         </section>
 
-        <div className="grid md:grid-cols-3 gap-6 mt-8">
+        {!founderGuide && <div className="grid md:grid-cols-3 gap-6 mt-8">
 
           <MetricCard label="📈 Market Potential" value={analysis.market_potential} color="green" />
 
@@ -652,7 +663,11 @@ export default function AnalysisDetails() {
 
           <MetricCard label="💰 Estimated Cost" value={analysis.estimated_cost} color="cyan" />
 
-        </div>
+        </div>}
+
+        <FounderGuideSections guide={founderGuide} />
+
+        {!founderGuide && <>
 
         <section className="mt-8 bg-white border border-teal-100 rounded-3xl p-8">
 
@@ -860,6 +875,8 @@ export default function AnalysisDetails() {
             </p>
           )}
         </section>
+
+        </>}
 
         <section className="mt-8 bg-white border border-green-500/30 rounded-3xl p-8">
 

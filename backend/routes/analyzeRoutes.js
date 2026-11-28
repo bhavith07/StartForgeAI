@@ -80,18 +80,19 @@ router.post("/", authenticateToken, async (req, res) => {
 
       startupScore: score,
       marketPotential: parsedAnalysis.marketPotential,
-      competition: parsedAnalysis.competition,
+      competition: parsedAnalysis.competition || "",
       estimatedCost: parsedAnalysis.estimatedCost,
 
       targetMarket: parsedAnalysis.targetMarket,
       growthPotential: parsedAnalysis.growthPotential,
 
-      marketChallenges: parsedAnalysis.marketChallenges,
-      competitors: parsedAnalysis.competitors,
-      competitorStrengths: parsedAnalysis.competitorStrengths,
-      competitorWeaknesses: parsedAnalysis.competitorWeaknesses,
+      marketChallenges: parsedAnalysis.marketChallenges || [],
+      competitors: parsedAnalysis.competitors || [],
+      competitorStrengths: parsedAnalysis.competitorStrengths || [],
+      competitorWeaknesses: parsedAnalysis.competitorWeaknesses || [],
       differentiationOpportunities:
         parsedAnalysis.differentiationOpportunities,
+      founderGuide: parsedAnalysis.founderGuide,
 
       strengths: parsedAnalysis.strengths,
       weaknesses: parsedAnalysis.weaknesses,
@@ -111,9 +112,7 @@ router.post("/", authenticateToken, async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message:
-        error.message ||
-        "Failed to analyze startup. Please try again.",
+      message: error.message || "Failed to analyze startup. Please try again.",
     });
   }
 });

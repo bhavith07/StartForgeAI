@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import API_BASE_URL from "../config/api";
 import jsPDF from "jspdf";
+import FounderGuideSections from "./FounderGuideSections";
+import { addFounderGuidePdf } from "../utils/founderGuidePdf";
 import {
   ArrowRight,
   BadgeCheck,
@@ -127,6 +129,7 @@ export default function IdeaForm() {
       competitor_weaknesses: result.competitorWeaknesses ?? result.competitor_weaknesses,
       differentiation_opportunities:
         result.differentiationOpportunities ?? result.differentiation_opportunities,
+      founder_guide: result.founderGuide ?? result.founder_guide,
       strengths: result.strengths,
       weaknesses: result.weaknesses,
       suggestions: result.suggestions,
@@ -315,7 +318,7 @@ export default function IdeaForm() {
     doc.text("STARTFORGE AI", left, 17);
     doc.setFontSize(21);
     doc.setTextColor(...colors.white);
-    doc.text("Startup Analysis Report", left, 29);
+    doc.text(analysis.founder_guide ? "Technology Startup Guide" : "Startup Analysis Report", left, 29);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(203, 213, 225);
@@ -357,46 +360,45 @@ export default function IdeaForm() {
     addLabelValue("Business Model", analysis.business_model);
     addLabelValue("Startup Idea", analysis.idea);
 
-    addSection("Core Assessment");
-    addLabelValue("Market Potential", analysis.market_potential);
-    addLabelValue("Competition", analysis.competition);
-    addLabelValue("Estimated Cost", analysis.estimated_cost);
-
-    addSection("Market Analysis");
-    addLabelValue("Target Market", analysis.target_market);
-    addLabelValue("Growth Potential", analysis.growth_potential);
-    addSection("Market Challenges", colors.amber);
-    addList(marketChallenges, colors.amber);
-
-    addSection("Competitor Analysis", colors.purple);
-    if (competitors.length) {
-      competitors.forEach((competitor, index) => {
-        ensureSpace(22);
-        const name = getCompetitorName(competitor);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(...colors.purple);
-        doc.text(`${index + 1}. ${name}`, left, y);
-        y += 6;
-        const description = getCompetitorDescription(competitor);
-        const strength = getCompetitorStrength(competitor);
-        const weakness = getCompetitorWeakness(competitor);
-        if (description) addWrapped(description, { fontSize: 9.5, after: 2 });
-        if (strength) addWrapped(strength, { fontSize: 9, color: colors.green, after: 2 });
-        if (weakness) addWrapped(weakness, { fontSize: 9, color: colors.red, after: 5 });
-      });
+    if (analysis.founder_guide) {
+      addFounderGuidePdf(analysis.founder_guide, addSection, addWrapped, addList, colors);
     } else {
-      addWrapped("No competitor details available.", { color: colors.muted });
+      addSection("Core Assessment");
+      addLabelValue("Market Potential", analysis.market_potential);
+      addLabelValue("Competition", analysis.competition);
+      addLabelValue("Estimated Cost", analysis.estimated_cost);
+      addSection("Market Analysis");
+      addLabelValue("Target Market", analysis.target_market);
+      addLabelValue("Growth Potential", analysis.growth_potential);
+      addSection("Market Challenges", colors.amber);
+      addList(marketChallenges, colors.amber);
+      addSection("Competitor Analysis", colors.purple);
+      if (competitors.length) {
+        competitors.forEach((competitor, index) => {
+          ensureSpace(22);
+          const name = getCompetitorName(competitor);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(11);
+          doc.setTextColor(...colors.purple);
+          doc.text(`${index + 1}. ${name}`, left, y);
+          y += 6;
+          const description = getCompetitorDescription(competitor);
+          const strength = getCompetitorStrength(competitor);
+          const weakness = getCompetitorWeakness(competitor);
+          if (description) addWrapped(description, { fontSize: 9.5, after: 2 });
+          if (strength) addWrapped(strength, { fontSize: 9, color: colors.green, after: 2 });
+          if (weakness) addWrapped(weakness, { fontSize: 9, color: colors.red, after: 5 });
+        });
+      } else {
+        addWrapped("No competitor details available.", { color: colors.muted });
+      }
+      addSection("Competitor Strengths", colors.green);
+      addList(competitorStrengths, colors.green);
+      addSection("Competitor Weaknesses", colors.red);
+      addList(competitorWeaknesses, colors.red);
+      addSection("Differentiation Opportunities", colors.cyan);
+      addList(differentiationOpportunities, colors.cyan);
     }
-
-    addSection("Competitor Strengths", colors.green);
-    addList(competitorStrengths, colors.green);
-
-    addSection("Competitor Weaknesses", colors.red);
-    addList(competitorWeaknesses, colors.red);
-
-    addSection("Differentiation Opportunities", colors.cyan);
-    addList(differentiationOpportunities, colors.cyan);
 
     addSection("Startup Strengths", colors.green);
     addList(strengths, colors.green);
@@ -447,7 +449,7 @@ export default function IdeaForm() {
             Take a closer look at your idea.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-            Share a few details to get a structured report on market potential, competition, estimated costs and possible next steps.
+            Build a technology startup assessment with an MVP plan, architecture, stack, milestones, cost ranges, risks and competitor candidates with clear evidence labels.
           </p>
         </div>
 
@@ -619,36 +621,39 @@ export default function IdeaForm() {
         {result && !loading && (
           <div className="mt-12">
             <div className="mb-6 rounded-3xl border border-teal-100 bg-gradient-to-r from-white to-teal-50 p-7 shadow-sm sm:p-9">
-              <p className="text-sm font-semibold text-teal-700">Your startup analysis is ready</p>
+              <p className="text-sm font-semibold text-teal-700">Your technology startup guide is ready</p>
               <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">{form.startupName}</h2>
               <p className="mt-2 text-sm text-slate-500">Review your results below and download your report when you're ready.</p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className={`grid gap-4 ${result.founderGuide ? "max-w-sm" : "sm:grid-cols-2 xl:grid-cols-4"}`}>
               <div className="rounded-2xl border border-teal-200 bg-white p-6 shadow-sm">
                 <p className="text-sm font-semibold text-slate-500">Startup Score</p>
                 <p className="mt-3 text-5xl font-extrabold text-teal-700">{result.startupScore ?? "--"}</p>
                 <p className="mt-1 text-xs font-medium text-slate-500">out of 100</p>
+                {result.founderGuide && <p className="mt-2 text-xs leading-5 text-slate-500">Directional AI rubric; not a validated forecast.</p>}
                 <div className="mt-5 h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
                   <div className="h-full rounded-full bg-teal-500 transition-all duration-1000" style={{ width: `${Math.max(0, Math.min(100, Number(result.startupScore) || 0))}%` }} />
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              {!result.founderGuide && <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <p className="text-sm font-semibold text-slate-500">📈 Market Potential</p>
                 <p className="mt-4 text-lg font-bold leading-7 text-emerald-700">{result.marketPotential}</p>
-              </div>
+              </div>}
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              {!result.founderGuide && <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <p className="text-sm font-semibold text-slate-500">⚔️ Competition</p>
                 <p className="mt-4 text-lg font-bold leading-7 text-amber-700">{result.competition}</p>
-              </div>
+              </div>}
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              {!result.founderGuide && <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <p className="text-sm font-semibold text-slate-500">💰 Estimated Cost</p>
                 <p className="mt-4 text-lg font-bold leading-7 text-teal-700">{result.estimatedCost}</p>
-              </div>
+              </div>}
             </div>
+
+            <FounderGuideSections guide={result.founderGuide} />
 
             {[
               { title: "Strengths", items: result.strengths || [], icon: "✓", color: "text-emerald-700", iconColor: "text-emerald-600" },
