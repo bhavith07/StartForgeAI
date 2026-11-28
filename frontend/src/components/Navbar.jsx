@@ -99,7 +99,7 @@ export default function Navbar() {
 
               <div>
                 <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Startup tools</p>
-                <button className={itemClass} onClick={() => go("/#idea-form")}>
+                <button className={itemClass} onClick={() => go("/dashboard/analyze")}>
                   <Rocket size={18} /> Analyze Startup <ChevronRight className="ml-auto" size={15} />
                 </button>
                 <button className={itemClass} onClick={() => go(isLoggedIn ? "/dashboard/competitors" : "/login")}>
