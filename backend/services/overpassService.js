@@ -45,6 +45,12 @@ const CATEGORY_TAGS = {
   coworking: [["office", "coworking"]],
   "technology companies": [["office", "it"], ["office", "software"], ["office", "telecommunication"], ["office", "technology"], ["office", "computer"], ["name", "startup"]],
   "tech companies": [["office", "it"], ["office", "software"], ["office", "telecommunication"], ["office", "technology"], ["office", "computer"], ["name", "startup"]],
+  "software companies": [["office", "it"], ["office", "software"], ["office", "technology"], ["office", "computer"], ["name", "startup"]],
+  "software company": [["office", "it"], ["office", "software"], ["office", "technology"], ["office", "computer"], ["name", "startup"]],
+  "it companies": [["office", "it"], ["office", "software"], ["office", "technology"], ["office", "computer"], ["name", "startup"]],
+  "it company": [["office", "it"], ["office", "software"], ["office", "technology"], ["office", "computer"], ["name", "startup"]],
+  "ai companies": [["office", "it"], ["office", "software"], ["office", "technology"], ["name", "startup"]],
+  "ai startups": [["office", "it"], ["office", "software"], ["office", "technology"], ["name", "startup"]],
   "tech startups": [["office", "it"], ["office", "software"], ["office", "technology"], ["name", "startup"]],
   startups: [["office", "it"], ["office", "software"], ["office", "technology"], ["name", "startup"]],
 };
