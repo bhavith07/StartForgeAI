@@ -195,8 +195,7 @@ export default function Dashboard() {
                 <span className="inline-flex items-center gap-2"><Sparkles size={13} /> Turn research into action</span>
               </div>
             </div>
-
-
+          </div>
         </section>
 
         {/* Quick access */}
