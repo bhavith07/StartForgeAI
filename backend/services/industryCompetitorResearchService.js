@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 
-const MODEL = process.env.GEMINI_INDUSTRY_RESEARCH_MODEL || "gemini-2.5-flash";
+const MODEL = process.env.GEMINI_INDUSTRY_RESEARCH_MODEL || "gemini-3.8-flash";
 const MAX_COMPETITORS = 12;
 
 function httpError(message, status = 400) {
